@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void decodificar(FILE* archivo) {	
+void decodificar() {	
 
 	//Definición de las máscaras a utilizar
 	unsigned char a1mask = 0xFC;
@@ -11,16 +11,13 @@ void decodificar(FILE* archivo) {
 	unsigned char c1mask = 0xC0;
 	unsigned char c2mask = 0X2F;
 
-
 	//Definición de los resultados y variables temporales
-	char* buffer;
+	char buffer[1];
 	int contador = 0;
 	unsigned char a1, a2, b1, b2, c1, c2;
 
-	fgets(buffer, 1, archivo);	
-	while(buffer) {
+	while(fgets(buffer, 1, stdin)) {
 
-		fgets(buffer, 1, archivo);
 		switch (contador) {
 			case 0:
 				a1 = *buffer & a1mask; //a1 resultado
@@ -53,6 +50,5 @@ void decodificar(FILE* archivo) {
 }
 
 int main (int argc, char const *argv[]) {
-	char* buffer;
-	decodificar(stdin);
+	decodificar();
 }
