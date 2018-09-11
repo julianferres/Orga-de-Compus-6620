@@ -13,7 +13,7 @@ void decodificar() {
 	unsigned char c2mask = 0X2F;
 
 	//Definición de los resultados y variables temporales
-	char buffer[100];
+	char buffer[1];
 	int contador = 0;
 	unsigned char a1, a2, b1, b2, c1, c2;
 
@@ -22,7 +22,7 @@ void decodificar() {
 	'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
 	'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
 
-	while(fgets(buffer, 100, stdin) != NULL) {
+	while(fgets(buffer, 1000, stdin) != NULL) {
 		
 		//Remover el salto de línea
 		int i = strlen(buffer)-1;
@@ -31,7 +31,7 @@ void decodificar() {
 
 		if(contador == 0) {
 			a1 = *buffer & a1mask; //a1 resultado
-			printf("%d \n", a1);
+			//printf("a1= %d \n", a1);
 			printf("%c", B64[a1]); 
 			a2 = *buffer & a2mask;
 			contador++;
@@ -42,6 +42,7 @@ void decodificar() {
 			b1 = *buffer & b1mask;
 			b1 = b1 >> 4;
 			b1 = b1 & a2; //b1 resultado
+			//printf("b1= %d \n", b1);
 			printf("%c", B64[b1]); 
 			b2 = *buffer & b2mask;
 			contador++;
@@ -52,8 +53,10 @@ void decodificar() {
 			c1 = *buffer & c1mask;
 			c1 = c1 >> 6;
 			c1 = c1 & b2; //c1 resultado
+			//printf("c1= %d \n", c1);
 			printf("%c", B64[c1]);
 			c2 = *buffer & c2mask; //c2 resultado
+			//printf("c2= %d \n", c2);
 			printf("%c", B64[c2]);
 			contador = 0;
 		}

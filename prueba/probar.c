@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 int main() {
-	unsigned char numero = 0xF0;
+	unsigned char numero = 0x43;
 	unsigned char mander = 0x45;
 
 	unsigned char and = mander & numero;
