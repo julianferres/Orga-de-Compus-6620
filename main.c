@@ -22,9 +22,10 @@ void decodificar() {
 	'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
 	'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
 
-	while(fgets(buffer, 1000, stdin) != NULL) {
+	while(fgets(buffer, 1, stdin) != NULL) {
 		
-		//Remover el salto de línea
+		//Usar fgetc, no almacena el resultado en un buffer, devuelve un int que va de 0 a 255 para caracteres validos y la representacion de -1 para el EOF 
+		//man getopt_log ayuda a parsera reconocer cuakk es eo nombre del archivo, es tipo una libreria
 		int i = strlen(buffer)-1;
   		if(buffer[i]=='\n') 
       	buffer[i] = '\0';
