@@ -2,7 +2,14 @@
 #include <string.h>
 #include <stdlib.h>
 
-void decodificar() {	
+
+//Definición de la tabla B64
+const char B64[64]={'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 
+'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
+'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
+
+
+void encode() {	
 
 	//Definición de las máscaras a utilizar
 	unsigned char a1mask = 0xFC;
@@ -15,17 +22,15 @@ void decodificar() {
 	//Definición de los resultados y variables temporales
 	int contador = 0;
 	int a1, a2, b1, b2, c1, c2;
+	
 
-	//Definición de la tabla B64
-	char B64[64]={'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 
-	'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
-	'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
-
-	FILE* fp = fopen("input.txt","r");
+	FILE* wfp = fopen("output","wb");
+	FILE* fp = fopen("input","rb");
 	if (fp == NULL){fprintf(stderr, "no encuentro el archivo\n"); return;}
 	int caracter = fgetc(fp);
-
-	while(caracter != EOF && caracter != '\n') {
+	
+	
+	while(caracter != EOF) {
 		
 		//Usar fgetc, no almacena el resultado en un buffer, devuelve un int que va de 0 a 255 para caracteres validos y la representacion de -1 para el EOF 
 		//man getopt_log ayuda a parsera reconocer cuakk es eo nombre del archivo, es tipo una libreria
@@ -83,7 +88,35 @@ void decodificar() {
 	}
 }
 
+
+int get_i64(unsigned char c){
+	for(int i=0; i<64; i++){
+		if(B64[i] == c) {printf("%d\n",i); return i;}
+	}
+	return -1;
+
+}
+
+void decode(){
+
+	FILE* fp = fopen("input.txt","r");
+	if (fp == NULL){fprintf(stderr, "no encuentro el archivo\n"); return;}
+	int caracter = fgetc(fp);
+	
+	while(caracter != EOF) {
+	
+		unsigned char buffer = (unsigned char) caracter;
+		unsigned char b64i = (unsigned char)get_i64(buffer);
+		//printf("%d", b64i);
+		caracter = fgetc(fp);
+	}
+	
+	//ceci cierra el archivo
+
+}
+
 int main (int argc, char const *argv[]) {
-	decodificar();
+	encode();
+	//decode();
 	printf("\n");
 }
