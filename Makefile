@@ -2,7 +2,7 @@
 EXEC =  main
 CC = gcc
 OBJ = main.o
-CFLAGS = -g -std=c99 -Wall -pedantic -Wconversion -Wno-sign-conversion -Werror
+CFLAGS = -g -std=c99 -Wall -pedantic -Wconversion -Wno-sign-conversion  
 
 #Instruccion que se va a ejecutar por defalut
 all: $(EXEC)

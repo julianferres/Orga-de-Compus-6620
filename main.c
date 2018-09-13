@@ -10,11 +10,11 @@ void decodificar() {
 	unsigned char b1mask = 0xF0;
 	unsigned char b2mask = 0x0F;
 	unsigned char c1mask = 0xC0;
-	unsigned char c2mask = 0X2F;
+	unsigned char c2mask = 0X3F;
 
 	//Definición de los resultados y variables temporales
 	int contador = 0;
-	unsigned char a1, a2, b1, b2, c1, c2;
+	int a1, a2, b1, b2, c1, c2;
 
 	//Definición de la tabla B64
 	char B64[64]={'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 
@@ -23,64 +23,63 @@ void decodificar() {
 
 	FILE* fp = fopen("input.txt","r");
 	if (fp == NULL){fprintf(stderr, "no encuentro el archivo\n"); return;}
-	int buffer = fgetc(fp);
+	int caracter = fgetc(fp);
 
-	while(buffer != EOF) {
+	while(caracter != EOF && caracter != '\n') {
 		
 		//Usar fgetc, no almacena el resultado en un buffer, devuelve un int que va de 0 a 255 para caracteres validos y la representacion de -1 para el EOF 
 		//man getopt_log ayuda a parsera reconocer cuakk es eo nombre del archivo, es tipo una libreria
 		
-		/*size_t i = strlen(buffer)-1;
-  		if(buffer[i]=='\n') 
-      	buffer[i] = '\0';
-      	*/
-
-
+		unsigned char buffer = (unsigned char) caracter;
 		if(contador == 0) {
 			a1 = buffer & a1mask; //a1 resultado
+			a1 = a1 >> 2;
 			a2 = buffer & a2mask;
-			printf("%c", B64[a1]);
+			a2 = (unsigned char) a2 << 4;
 			contador++;
-			buffer = fgetc(fp);
+			printf("%c", B64[a1]);
+			caracter = fgetc(fp);
 			continue;
 		}
 
 		if(contador == 1) {
-			a2 = a2 << 4;
 			b1 = buffer & b1mask;
 			b1 = b1 >> 4;
-			b1 = b1 & a2; //b1 resultado
+			b1 = b1 | a2; //b1 resultado
 			b2 = buffer & b2mask;
-			printf("%c", B64[b1]);
+			b2 = (unsigned char)b2 << 2;	
 			contador++;
-			buffer = fgetc(fp);
+			printf("%c", B64[b1]);
+			caracter = fgetc(fp);
+			
 			continue;
 		}
 
 		if(contador == 2) {
-			b2 = b2 << 2;
 			c1 = buffer & c1mask;
 			c1 = c1 >> 6;
-			c1 = c1 & b2; //c1 resultado
+			c1 = c1 | b2; //c1 resultado
 			c2 = buffer & c2mask; //c2 resultado
 			contador = 0;
 			printf("%c", B64[c1]);
 			printf("%c", B64[c2]);
-			buffer = fgetc(fp);
+			caracter = fgetc(fp);
 			continue;
 		}
-
 		
 	}
 	
 
 	// finalizado el ciclo, fijarse si hay que agregar '=' o '=='
 	switch (contador) {
-		case 0:
-		printf("==");
+		case 2:
+			printf("%c", B64[b2]);
+			printf("=");
+			return;
 		case 1:
-		printf("=");
-		return;
+			printf("%c", B64[a2]);
+			printf("==");
+			return;
 	}
 }
 
