@@ -14,7 +14,7 @@ const char AYUDA[] = "Usage:\n tp0 -h \n tp0 -V \n tp0 [options] \n Options: \n 
 //Definición de versión del programa
 const char VERSION[] = "2018.9.18";
 
-void encode() {	
+void encode(FILE* fp) {	
 
 	//Definición de las máscaras a utilizar
 	unsigned char a1mask = 0xFC;
@@ -30,7 +30,7 @@ void encode() {
 	
 
 	FILE* wfp = fopen("output","wb");
-	FILE* fp = fopen("input","rb");
+	//FILE* fp = fopen("input","rb");
 	if (fp == NULL){fprintf(stderr, "no encuentro el archivo\n"); return;}
 	int caracter = fgetc(fp);
 	
@@ -146,10 +146,12 @@ int main (int argc, char const *argv[]) {
     		case 'a': break;
     		case 'i': break;
     		case 'o': break;
-    		default:
-    			return 0;
+    		case 0:
+    			printf ("%s", "Entro al default");
+    			encode(stdin);
     	}
     }
+    return 0;
 
 	//encode();
 	//decode();
