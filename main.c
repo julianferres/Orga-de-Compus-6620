@@ -94,7 +94,7 @@ void encode(FILE* fp) {
 	}
 
 	fclose(fp);
-	fclose(wp);
+	fclose(wfp);
 }
 
 
@@ -108,17 +108,92 @@ int get_i64(unsigned char c){
 
 void decode(){
 
+	
 	FILE* fp = fopen("input.txt","r");
 	if (fp == NULL){fprintf(stderr, "no encuentro el archivo\n"); return;}
+	
+	FILE* wfp = fopen("output","wb");
+	//FILE* fp = fopen("input","rb");
+	if (fp == NULL){fprintf(stderr, "no encuentro el archivo\n"); return;}
+
+	unsigned char a, b, c, d ; 
+
+	//Definición de las máscaras a utilizar
+	unsigned char mask1 = 0x30; 
+	unsigned char mask2 = 0x3A; 		
+	unsigned char mask3 = 0x3F;
+	
+	//Definición de los resultados y variables temporales
+	int contador = 0;
+	
 	int caracter = fgetc(fp);
-	
-	while(caracter != EOF) {
-	
-		unsigned char buffer = (unsigned char) caracter;
-		unsigned char b64i = (unsigned char)get_i64(buffer);
-		//printf("%d", b64i);
-		caracter = fgetc(fp);
+	//Usar fgetc, no almacena el resultado en un buffer, devuelve un int que va de 0 a 255 para caracteres validos y la representacion de -1 para el EOF 
+
+
+	unsigned char buffer = (unsigned char) caracter;
+	a = (unsigned char)get_i64(buffer);
+
+	while( caracter != EOF ) {
+		
+		
+		if(contador == 0) {
+			
+			caracter = fgetc(fp);
+			
+			unsigned char buffer = (unsigned char) caracter;
+			b = (unsigned char)get_i64(buffer); //Lo paso a su indice en Base64	
+
+			a = a << 2; 
+			a = a | ((b & mask1) >> 4);
+
+			fprintf(wfp, "%c", a);
+
+			contador++;
+			continue;
+		}
+
+		if(contador == 1) {
+			
+			caracter = fgetc(fp);
+			
+			if ( caracter == '=') break;
+
+			unsigned char buffer = (unsigned char) caracter;
+			c = (unsigned char)get_i64(buffer); //Lo paso a su indice en Base64	
+
+			b = b << 4; //Primeros 4 bits 
+			b = b | ((c & mask2) >> 2);
+
+
+			fprintf(wfp, "%c", b);
+
+			contador++;
+			continue;
+		}
+
+		if(contador == 2) {
+			
+			caracter = fgetc(fp);
+			
+			if ( caracter == '=') break;
+
+
+			unsigned char buffer = (unsigned char) caracter;
+			d = (unsigned char)get_i64(buffer); //Lo paso a su indice en Base64	
+
+			c = c << 6; //Primeros 2 bits 
+			c = c | (d & mask3);
+
+			fprintf(wfp, "%c", c);
+
+			contador = 0;
+			continue;
+		}	
+		
 	}
+	
+	fclose(fp);
+	fclose(wfp);
 	
 	//ceci cierra el archivo
 }
@@ -148,7 +223,7 @@ int main (int argc, char const *argv[]) {
     		case 'a': 
     			if (! strcmp(optarg, "encode")) //Hacer algo para comunicar con los otros casos
     			if (! strcmp(optarg, "decode")) //Hacer algo para comunicar con los otros casos
-    			else fprintf(stderr, "Invalid command \n");
+    			//else fprintf(stderr, "Invalid command \n");
     			break;
     		case 'i': 
     			if (optarg) { 
@@ -158,8 +233,8 @@ int main (int argc, char const *argv[]) {
     			}
     		case 'o': 
     			if (optarg) { 
-    				FILE* wp = fopen(optarg, 'w'); 
-    				if(! fp) { fprintf(stderr, "File not found"); }
+    				FILE* wfp = fopen(optarg, 'w'); 
+    				if(! wfp) { fprintf(stderr, "File not found"); }
     				//Pasarle el fp a la función correspondiente
     			}
     		case 0:
@@ -169,6 +244,6 @@ int main (int argc, char const *argv[]) {
     }	
     return 0;
 	//encode();
-	//decode();
+	decode();
 	printf("\n");
 }
