@@ -42,7 +42,8 @@ void encode() {
 			a2 = buffer & a2mask;
 			a2 = (unsigned char) a2 << 4;
 			contador++;
-			printf("%c", B64[a1]);
+			fprintf(wfp, "%c", B64[a1]);
+			//printf("%c", B64[a1]);
 			caracter = fgetc(fp);
 			continue;
 		}
@@ -54,9 +55,9 @@ void encode() {
 			b2 = buffer & b2mask;
 			b2 = (unsigned char)b2 << 2;	
 			contador++;
-			printf("%c", B64[b1]);
+			fprintf(wfp, "%c", B64[b1]);
+			//printf("%c", B64[b1]);
 			caracter = fgetc(fp);
-			
 			continue;
 		}
 
@@ -65,9 +66,11 @@ void encode() {
 			c1 = c1 >> 6;
 			c1 = c1 | b2; //c1 resultado
 			c2 = buffer & c2mask; //c2 resultado
-			contador = 0;
-			printf("%c", B64[c1]);
-			printf("%c", B64[c2]);
+			contador = 0;;
+			fprintf(wfp, "%c", B64[c1]);
+			fprintf(wfp, "%c", B64[c2]);
+			//printf("%c", B64[c1]);
+			//printf("%c", B64[c2]);
 			caracter = fgetc(fp);
 			continue;
 		}
