@@ -177,7 +177,7 @@ void decode(FILE* fp, FILE* wfp){
 int main (int argc, char const *argv[]) {
 	
 	static struct option long_options[] = {
-            {"version",  no_argument, 0,  0 },
+            {"version",  no_argument, 0,  0 }, //Estos 0s medio que no se que son
             {"help",  no_argument, 0,  0 },
             {"input",  optional_argument, 0,  0 },
             {"output", optional_argument, 0,  0 },
@@ -224,5 +224,7 @@ int main (int argc, char const *argv[]) {
     	if(isencode) encode(fp, wfp);
     	else decode(fp, wfp); 
     }	
+    //El tema de este switch es que me lee el primer comando y no más como optarg. Osea, hago: ./main -a encode -i input -o output 
+    //y me toma como optarg encode y no más. Es raro.
     return 0;
 }
