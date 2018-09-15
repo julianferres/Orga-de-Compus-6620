@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <stdbool.h>
 
 //Definición de la tabla B64
 const char B64[64]= {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 
@@ -14,7 +15,7 @@ const char HELP[] = "Usage:\n tp0 -h \n tp0 -V \n tp0 [options] \n Options: \n -
 //Definición de versión del programa
 const char VERSION[] = "2018.9.18 \n";
 
-void encode(FILE* fp) {	
+void encode(FILE* fp, FILE* wfp) {
 
 	//Definición de las máscaras a utilizar
 	unsigned char a1mask = 0xFC;
@@ -28,9 +29,6 @@ void encode(FILE* fp) {
 	int contador = 0;
 	int a1, a2, b1, b2, c1, c2;
 	
-
-	FILE* wfp = fopen("output","wb");
-	//FILE* fp = fopen("input","rb");
 	if (fp == NULL){fprintf(stderr, "no encuentro el archivo\n"); return;}
 	int caracter = fgetc(fp);
 	
@@ -38,8 +36,7 @@ void encode(FILE* fp) {
 	while(caracter != EOF) {
 		
 		//Usar fgetc, no almacena el resultado en un buffer, devuelve un int que va de 0 a 255 para caracteres validos y la representacion de -1 para el EOF 
-		//man getopt_log ayuda a parsera reconocer cuakk es eo nombre del archivo, es tipo una libreria
-		
+		//man getopt_log ayuda a parsera reconocer cuakk es eo nombre del archivo, es tipo una libreria		
 		unsigned char buffer = (unsigned char) caracter;
 		if(contador == 0) {
 			a1 = buffer & a1mask; //a1 resultado
@@ -48,7 +45,6 @@ void encode(FILE* fp) {
 			a2 = (unsigned char) a2 << 4;
 			contador++;
 			fprintf(wfp, "%c", B64[a1]);
-			//printf("%c", B64[a1]);
 			caracter = fgetc(fp);
 			continue;
 		}
@@ -61,7 +57,6 @@ void encode(FILE* fp) {
 			b2 = (unsigned char)b2 << 2;	
 			contador++;
 			fprintf(wfp, "%c", B64[b1]);
-			//printf("%c", B64[b1]);
 			caracter = fgetc(fp);
 			continue;
 		}
@@ -74,8 +69,6 @@ void encode(FILE* fp) {
 			contador = 0;
 			fprintf(wfp, "%c", B64[c1]);
 			fprintf(wfp, "%c", B64[c2]);
-			//printf("%c", B64[c1]);
-			//printf("%c", B64[c2]);
 			caracter = fgetc(fp);
 			continue;
 		}	
@@ -84,44 +77,35 @@ void encode(FILE* fp) {
 	// finalizado el ciclo, fijarse si hay que agregar '=' o '=='
 	switch (contador) {
 		case 2:
-			printf("%c", B64[b2]);
-			printf("=");
+			fprintf(wfp, "%c", B64[b2]);
+			fprintf(wfp, "=");
 			break;
 		case 1:
-			printf("%c", B64[a2]);
-			printf("==");
+			fprintf(wfp, "%c", B64[a2]);
+			fprintf(wfp, "==");
 			break;
 	}
-
-	fclose(fp);
-	fclose(wfp);
 }
 
 
 int get_i64(unsigned char c){
 	for(int i=0; i<64; i++){
-		if(B64[i] == c) {printf("%d\n",i); return i;}
+		if(B64[i] == c) {
+		return i;
+		}
 	}
 	return -1;
 
 }
 
-void decode(){
-
-	
-	FILE* fp = fopen("input.txt","r");
-	if (fp == NULL){fprintf(stderr, "no encuentro el archivo\n"); return;}
-	
-	FILE* wfp = fopen("output","wb");
-	//FILE* fp = fopen("input","rb");
-	if (fp == NULL){fprintf(stderr, "no encuentro el archivo\n"); return;}
+void decode(FILE* fp, FILE* wfp){
 
 	unsigned char a, b, c, d ; 
 
 	//Definición de las máscaras a utilizar
-	unsigned char mask1 = 0x30; 
-	unsigned char mask2 = 0x3A; 		
-	unsigned char mask3 = 0x3F;
+	unsigned char mask1 = 0x30; //00110000
+	unsigned char mask2 = 0x3A; //00111100 		
+	unsigned char mask3 = 0x3F; //00111111
 	
 	//Definición de los resultados y variables temporales
 	int contador = 0;
@@ -129,11 +113,10 @@ void decode(){
 	int caracter = fgetc(fp);
 	//Usar fgetc, no almacena el resultado en un buffer, devuelve un int que va de 0 a 255 para caracteres validos y la representacion de -1 para el EOF 
 
-
 	unsigned char buffer = (unsigned char) caracter;
 	a = (unsigned char)get_i64(buffer);
 
-	while( caracter != EOF ) {
+	while(caracter != EOF ) {
 		
 		
 		if(contador == 0) {
@@ -163,8 +146,7 @@ void decode(){
 
 			b = b << 4; //Primeros 4 bits 
 			b = b | ((c & mask2) >> 2);
-
-
+			
 			fprintf(wfp, "%c", b);
 
 			contador++;
@@ -188,18 +170,12 @@ void decode(){
 
 			contador = 0;
 			continue;
-		}	
-		
+		}			
 	}
-	
-	fclose(fp);
-	fclose(wfp);
-	
-	//ceci cierra el archivo
 }
 
 int main (int argc, char const *argv[]) {
-
+	
 	static struct option long_options[] = {
             {"version",  no_argument, 0,  0 },
             {"help",  no_argument, 0,  0 },
@@ -210,9 +186,13 @@ int main (int argc, char const *argv[]) {
       };
 
     int opt;
+    FILE* fp = stdin;
+    FILE* wfp = stdout;
     int option_index = 0;
 
-    while ((opt = getopt_long(argc, argv, "Vhaio" ,long_options, &option_index)) != -1) {
+    while ((opt = getopt_long(argc, argv, "Vha:i:o:" ,long_options, &option_index)) != -1) {
+    	bool isencode;
+
     	switch (opt) {
     		case 'h':
     			fprintf(stdout, HELP);
@@ -221,29 +201,28 @@ int main (int argc, char const *argv[]) {
     			fprintf(stdout, VERSION);
     			break;
     		case 'a': 
-    			if (! strcmp(optarg, "encode")) //Hacer algo para comunicar con los otros casos
-    			if (! strcmp(optarg, "decode")) //Hacer algo para comunicar con los otros casos
-    			//else fprintf(stderr, "Invalid command \n");
-    			break;
+    			if (! strcmp(optarg, "encode")) { 
+    				isencode = true;
+    			}	
+    			if (! strcmp(optarg, "decode")) {
+    				isencode = false;
+    			}
     		case 'i': 
-    			if (optarg) { 
-    				FILE* fp = fopen(optarg, 'r'); 
-    				if(! fp) { fprintf(stderr, "File not found"); }
-    				//Pasarle el fp a la función correspondiente
+    			if (argc >= 5) { 
+    				fp = fopen(argv[4], "r"); 
+    				if(! fp) { fprintf(stderr, "File not found \n"); }
     			}
     		case 'o': 
-    			if (optarg) { 
-    				FILE* wfp = fopen(optarg, 'w'); 
-    				if(! wfp) { fprintf(stderr, "File not found"); }
-    				//Pasarle el fp a la función correspondiente
+    			if (argc >= 7) { 
+    				wfp = fopen(argv[6], "w"); 
+    				if(! wfp) { fprintf(stderr, "File Error \n"); }
     			}
+    			break;
     		case 0:
-    			printf ("%s", "Entro al default"); //No entiendo esto
-    			encode(stdin);
+    			abort();
     	}
+    	if(isencode) encode(fp, wfp);
+    	else decode(fp, wfp); 
     }	
     return 0;
-	//encode();
-	decode();
-	printf("\n");
 }
