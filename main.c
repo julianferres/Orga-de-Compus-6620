@@ -226,7 +226,5 @@ int main (int argc, char const *argv[]) {
     	return 0;
     }	
     encode(stdin, stdout); //Por default
-    //El tema de este switch es que me lee el primer comando y no más como optarg. Osea, hago: ./main -a encode -i input -o output 
-    //y me toma como optarg encode y no más. Es raro.
     return 0;
 }
