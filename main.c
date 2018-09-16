@@ -104,7 +104,7 @@ void decode(FILE* fp, FILE* wfp){
 
 	//Definición de las máscaras a utilizar
 	unsigned char mask1 = 0x30; //00110000
-	unsigned char mask2 = 0x3A; //00111100 		
+	unsigned char mask2 = 0x3C; //00111100 		
 	unsigned char mask3 = 0x3F; //00111111
 	
 	//Definición de los resultados y variables temporales
@@ -118,11 +118,10 @@ void decode(FILE* fp, FILE* wfp){
 
 	while(caracter != EOF ) {
 		
-		
 		if(contador == 0) {
 			
 			caracter = fgetc(fp);
-			
+			if(caracter == -1) break;
 			unsigned char buffer = (unsigned char) caracter;
 			b = (unsigned char)get_i64(buffer); //Lo paso a su indice en Base64	
 
@@ -130,7 +129,6 @@ void decode(FILE* fp, FILE* wfp){
 			a = a | ((b & mask1) >> 4);
 
 			fprintf(wfp, "%c", a);
-
 			contador++;
 			continue;
 		}
@@ -146,9 +144,7 @@ void decode(FILE* fp, FILE* wfp){
 
 			b = b << 4; //Primeros 4 bits 
 			b = b | ((c & mask2) >> 2);
-			
 			fprintf(wfp, "%c", b);
-
 			contador++;
 			continue;
 		}
@@ -159,7 +155,6 @@ void decode(FILE* fp, FILE* wfp){
 			
 			if ( caracter == '=') break;
 
-
 			unsigned char buffer = (unsigned char) caracter;
 			d = (unsigned char)get_i64(buffer); //Lo paso a su indice en Base64	
 
@@ -167,7 +162,6 @@ void decode(FILE* fp, FILE* wfp){
 			c = c | (d & mask3);
 
 			fprintf(wfp, "%c", c);
-
 			contador = 0;
 			continue;
 		}			
@@ -177,12 +171,12 @@ void decode(FILE* fp, FILE* wfp){
 int main (int argc, char const *argv[]) {
 	
 	static struct option long_options[] = {
-            {"version",  no_argument, 0,  0 }, //Estos 0s medio que no se que son
+            {"version",  no_argument, 0,  0 }, 
             {"help",  no_argument, 0,  0 },
             {"input",  optional_argument, 0,  0 },
             {"output", optional_argument, 0,  0 },
             {"action",  optional_argument, 0, 0},
-            {0,  0,   0,  0 } //El ultimo elemento del struct deben ser ceros
+            {0,  0,   0,  0 } 
       };
 
     int opt;
