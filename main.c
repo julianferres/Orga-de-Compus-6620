@@ -225,6 +225,6 @@ int main (int argc, char const *argv[]) {
     	else decode(fp, wfp); 
     	return 0;
     }	
-    encode(stdin, stdout); //Por default
+    encode(stdin, stdout);
     return 0;
 }
