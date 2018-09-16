@@ -190,16 +190,16 @@ int main (int argc, char const *argv[]) {
     FILE* wfp = stdout;
     int option_index = 0;
 
-    while ((opt = getopt_long(argc, argv, "Vha:i:o:" ,long_options, &option_index)) != -1) {
+    while ((opt = getopt_long(argc, argv, "Vha:i:o:" ,long_options, &option_index)) != -1) { //Los ":" simbolizan que necesita un argumento
     	bool isencode;
 
     	switch (opt) {
     		case 'h':
     			fprintf(stdout, HELP);
-    			break;
+    			return 0;
     		case 'V':
     			fprintf(stdout, VERSION);
-    			break;
+    			return 0;
     		case 'a': 
     			if (! strcmp(optarg, "encode")) { 
     				isencode = true;
@@ -223,7 +223,9 @@ int main (int argc, char const *argv[]) {
     	}
     	if(isencode) encode(fp, wfp);
     	else decode(fp, wfp); 
+    	return 0;
     }	
+    encode(stdin, stdout); //Por default
     //El tema de este switch es que me lee el primer comando y no más como optarg. Osea, hago: ./main -a encode -i input -o output 
     //y me toma como optarg encode y no más. Es raro.
     return 0;
