@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <stdbool.h>
-#include "code.c"
+#include "code.h"
 
 //Definición del menú de ayuda
 const char HELP[] = "Usage:\n tp0 -h \n tp0 -V \n tp0 [options] \n Options: \n -V, --version Print version and quit. \n -h, --help Print this information. \n -i, --input Location of the input file. \n -a, --action Program action: encode (default) or decode. \n";

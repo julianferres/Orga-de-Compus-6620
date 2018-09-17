@@ -1,10 +1,11 @@
+#include "code.h"
+
 //Definición de la tabla B64
 const char B64[64]= {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 
 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
 
-
-void encode(FILE* fp, FILE* wfp) {
+encode(FILE* fp, FILE* wfp) {
 
 	//Definición de las máscaras a utilizar
 	unsigned char a1mask = 0xFC;
@@ -76,14 +77,13 @@ void encode(FILE* fp, FILE* wfp) {
 }
 
 
-int get_i64(unsigned char c){
+int get_i64(unsigned char c) { 
 	for(int i=0; i<64; i++){
 		if(B64[i] == c) {
 		return i;
 		}
 	}
 	return -1;
-
 }
 
 void decode(FILE* fp, FILE* wfp) {
