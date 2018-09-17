@@ -162,6 +162,7 @@ void decode(FILE* fp, FILE* wfp){
 			c = c | (d & mask3);
 
 			fprintf(wfp, "%c", c);
+			a = (unsigned char) get_i64(fgetc(fp)) ;
 			contador = 0;
 			continue;
 		}			
