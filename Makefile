@@ -1,7 +1,7 @@
 # Constantes globales para la compilacion
 EXEC =  main
 CC = gcc
-OBJ = main.o
+OBJ = main.o code.o
 CFLAGS = -g -std=c99 -Wall -pedantic -Wconversion -Wno-sign-conversion  
 
 #Instruccion que se va a ejecutar por defalut
