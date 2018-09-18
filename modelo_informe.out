@@ -2,8 +2,8 @@
 \BOOKMARK [1][-]{section.2}{Documentaci\363n relevante al dise\361o e implementaci\363n del programa}{}% 2
 \BOOKMARK [2][-]{subsection.2.1}{Dise\361o}{section.2}% 3
 \BOOKMARK [2][-]{subsection.2.2}{Detalle de implementaci\363n}{section.2}% 4
-\BOOKMARK [2][-]{subsection.2.3}{Funci\363n encode}{section.2}% 5
-\BOOKMARK [2][-]{subsection.2.4}{Funci\363n decode}{section.2}% 6
+\BOOKMARK [3][-]{subsubsection.2.2.1}{Funci\363n encode}{subsection.2.2}% 5
+\BOOKMARK [3][-]{subsubsection.2.2.2}{Funci\363n decode}{subsection.2.2}% 6
 \BOOKMARK [1][-]{section.3}{Comandos para compilar el programa}{}% 7
 \BOOKMARK [1][-]{section.4}{Corridas de prueba}{}% 8
 \BOOKMARK [1][-]{section.5}{C\363digo fuente en C}{}% 9

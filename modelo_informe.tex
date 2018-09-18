@@ -22,11 +22,15 @@
 \begin{document}
 
 \maketitle
-\thispagestyle{empty}   % quita el número en la primer página
+   % quita el número en la primer página
+\thispagestyle{empty}
 
 \begin{abstract}
 Se propone como objetivo del Trabajo Práctico familiarizarse con las herramientas de software que serán utilizadas a lo largo de la cursada. Para eso se plantea la realización de un programa en lenguaje C para codificar y decodificar información en base64. Se utiliza el programa GXemul para simular el entorno de desarrollo, una máquina MIPS que corre una versión de NetBSD.
 \end{abstract}
+\newpage
+\tableofcontents
+\newpage
 
 \section{Introducción}
 Se propone escribir un programa en lenguaje C que codifique o decodifique información de base64. Se cuentan con una serie de comandos básicos para el desarrollo del programa que serán detallados en el subtítulo de Implementacion. El objetivo principal del programa consiste en realizar una acción que puede ser codificar o decodificar a partir de un archivo de entrada y generar un archivo de salida. En caso de no recibir los nombres de archivos se utiliza por defecto los streams standar stdin y stdout.
@@ -58,7 +62,7 @@ Pueden encontrar el codigo de nuestro programa en el repositorio:
 
 \subsection{Detalle de implementación}
 
-\subsection{Función encode}
+\subsubsection{Función encode}
 
 La función \texttt{encode} plantea un problema que radica en leer 6 bits cuando las funciones en C leen de a 1 byte como mínima unidad. Se utiliza la función \texttt{fgetc} que lee de a 1 carácter, es decir, 1 byte y se emplean las llamadas máscaras que permiten obtener los bits necesarios para procesar la información. Además, para acomodar los mismos a las posiciones que sean necesarias en cada caso se utilizan los operadores $>>$ o $<<$ que simbolizan \texttt{shift right} o \texttt{shift left} respectivamente. Todos los números obtenidos se utilizan como índice de la tabla de b64 para realizar la traducción y se escribe de la misma al archivo de salida o a stdout.
 \\
@@ -82,7 +86,7 @@ Al finalizar estos 3 casos se vuelve al \texttt{Caso 1} y se renueva el ciclo.
 
 En caso de tener 2 o 4 bits faltantes se rellenan con ceros y se agrega un \texttt{=} o un \texttt{==} respectivamente al final del texto para señalizar dicho agregado.
 
-\subsection{Función decode}
+\subsubsection{Función decode}
 
 La función \texttt{decode} plantea el problema de leer un carácter que proviene de la base64. Para traducirlo al número del cual proviene (1 a 64) se utiliza una función auxiliar que devuelve el índice de la tabla formato b64 al que corresponde dicho carácter. Siempre se trabajarán con dichos números y se los tratará como números de 6 bits. Como la lectura es de a 8 bits, los primeros 2 bits serán siempre 0. Se utiliza la función \texttt{fgetc} que lee de a 1 carácter, es decir, 1 byte y se emplean al igual que en el \texttt{encode} las llamadas máscaras y las operaciones de shift para acomodar los números a las posiciones determinadas en cada caso. 
 
