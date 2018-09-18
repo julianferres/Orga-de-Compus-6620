@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2018.9.18)  18 SEP 2018 01:43
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2018.9.18)  18 SEP 2018 02:51
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -218,43 +218,34 @@ Overfull \hbox (37.4968pt too wide) in paragraph at lines 45--46
  decodificar
  []
 
-[2]
-
-LaTeX Warning: Reference `fig001' on page 3 undefined on input line 80.
-
-
-Underfull \hbox (badness 1490) in paragraph at lines 97--98
+[2] [3]
+Underfull \hbox (badness 1490) in paragraph at lines 127--128
 []\OT1/cmr/m/n/10 Intel Tech-nol-ogy & Re-search, ``Hyper-Threading Tech-nol-og
 y,'' 2006,
  []
 
-[3] (./modelo_informe.aux)
-
-LaTeX Warning: There were undefined references.
-
- ) 
+[4] (./modelo_informe.aux) ) 
 Here is how much of TeX's memory you used:
- 1614 strings out of 494931
- 23120 string characters out of 6180851
- 76912 words of memory out of 5000000
- 4911 multiletter control sequences out of 15000+600000
- 9493 words of font info for 34 fonts, out of 8000000 for 9000
+ 1612 strings out of 494931
+ 23099 string characters out of 6180851
+ 77912 words of memory out of 5000000
+ 4910 multiletter control sequences out of 15000+600000
+ 9185 words of font info for 33 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  41i,7n,25p,894b,272s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
-r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
-e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/share/texli
-ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texm
-f-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/
-fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/ty
-pe1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/pu
-blic/amsfonts/cm/cmti12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
-msfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
-s/cm/cmtt12.pfb>
-Output written on modelo_informe.pdf (3 pages, 125186 bytes).
+</usr/share/texlive/texmf-dist/fonts/type1/public/a
+msfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmbx9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+r10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb
+></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/s
+hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/t
+exlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/texlive
+/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
+Output written on modelo_informe.pdf (4 pages, 120884 bytes).
 PDF statistics:
- 54 PDF objects out of 1000 (max. 8388607)
- 38 compressed objects within 1 object stream
+ 53 PDF objects out of 1000 (max. 8388607)
+ 37 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

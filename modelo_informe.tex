@@ -54,7 +54,7 @@ Las acciones de codificar y decodificar se separan en funciones distintas y se i
 
 \subsection{Función encode}
 
-La función \texttt{encode} plantea un problema que radica en leer 6 bits cuando las funciones en C leen de a 1 byte como mínima unidad. Se utiliza la función \texttt{fgetc} que lee de a 1 carácter, es decir, 1 byte y se emplean las llamadas máscaras que permiten obtener los bits necesarios para procesar la información. Además, para acomodar los mismos a las posiciones que sean necesarias en cada caso se utilizan los operadores \texttt{>>} o \texttt{<<} que simbolizan \texttt{shift right} o \texttt{shift left} respectivamente.
+La función \texttt{encode} plantea un problema que radica en leer 6 bits cuando las funciones en C leen de a 1 byte como mínima unidad. Se utiliza la función \texttt{fgetc} que lee de a 1 carácter, es decir, 1 byte y se emplean las llamadas máscaras que permiten obtener los bits necesarios para procesar la información. Además, para acomodar los mismos a las posiciones que sean necesarias en cada caso se utilizan los operadores \texttt{>>} o \texttt{<<} que simbolizan \texttt{shift right} o \texttt{shift left} respectivamente. Todos los números obtenidos se utilizan como índice de la tabla de b64 para realizar la traducción y se escribe de la misma al archivo de salida o a stdout.
 
 \underline{Caso 1}: Se leen 8 bits y se desean obtener los primeros 6. Para ello se utiliza el operador \texttt{and} entre el carácter obtenido y la máscara \texttt{11111100} o \texttt{0xFC} y se realiza un shift de dos posiciones a la derecha para que esos 6 bits se localicen en los últimas 6 posiciones. 
 
@@ -73,24 +73,54 @@ Para obtener el segundo número se utiliza el operador \texttt{and} entre el cará
 
 Al finalizar estos 3 casos se vuelve al \texttt{Caso 1} y se renueva el ciclo.
 
+En caso de tener 2 o 4 bits faltantes se rellenan con ceros y se agrega un \texttt{=} o un \texttt{==} respectivamente al final del texto para señalizar dicho agregado.
+
 \subsection{Función decode}
 
-\section{Este es el Título de Otra Sección}
+La función \texttt{decode} plantea el problema de leer un carácter que proviene de la base64. Para traducirlo al número del cual proviene (1 a 64) se utiliza una función auxiliar que devuelve el índice de la tabla formato b64 al que corresponde dicho carácter. Siempre se trabajarán con dichos números y se los tratará como números de 6 bits. Como la lectura es de a 8 bits, los primeros 2 bits serán siempre 0. Se utiliza la función \texttt{fgetc} que lee de a 1 carácter, es decir, 1 byte y se emplean al igual que en el \texttt{encode} las llamadas máscaras y las operaciones de shift para acomodar los números a las posiciones determinadas en cada caso. 
 
-Texto de la otra sección. En la figura~\ref{fig001} se muestra un ejemplo de cómo presentar las ilustraciones del informe.
+Se distinguen 3 casos:
+
+\underline{Caso 1}: Se utilizan los 6 bits del número obtenido con la función auxiliar y se traduce el próximo carácter a leer a través de la función auxiliar mencionada de la cual se obtienen también otros 6 bits. De esta manera, el número de 8 bytes se construye con el operador \texttt{|} entre los 6 bits del primero y los primeros 2 bits del segundo.
+
+- El primero se forma a partir de un shift a izquiera de 2 posiciones para dejar libre dichas posiciones a los primeros 2 bits del segundo número formado.
+
+- El segundo número se forma a partir del operador \texttt{and} entre el segundo indice obtenido a través de la función auxiliar y la máscara \texttt{00110000} o \texttt{0x30}. Se realiza un shift de 4 posiciones a la derecha para que queden localizados en las dos últimas posiciones.
+
+\underline{Caso 2}: Se utilizan los 4 bits que sobraron del \texttt{Caso 1} y se lee el próximo carácter, del cual se obtiene el índice de la tabla B64 con la función auxiliar mencionada y se utilizan los primeros 4 bits. Se utiliza el operador \texttt{|} para unificar ambos números.
+
+- Para obtener el primer número se realiza un shift a izquierda de 4 posiciones para dejar libres las últimas 4 posiciones para el segundo número.
+
+- Para obtener el segundo número se utiliza el operador \texttt{and} entre el índice devuelto por la función auxiliar en este caso y la máscara \texttt{00111100} o \texttt{0x3C}. Se utiliza esa máscara porque los primeros 2 bits siempre son 0, como fue mencionado anteriormente. Para que esos 4 bits se ubiquen en las últimas 4 posiciones se realiza un shift a derecha de valor 2.
+
+\underline{Caso 3}: Se utilizan los 2 bits sobrantes del \texttt{Caso 2} y se lee un nuevo carácter, que se traduce a partir de la función auxiliar mencionada a un nuevo índice entre 0 y 64 del cual se toman los 6 bits del mismo. Ambos números se utilizan con el operador \texttt{|}.
+
+- El primer número se obtiene a partir de un shift a izquierda de 6 posiciones del número obtenido en el \texttt{Caso 2} a partir de la función auxiliar. De esta manera deja los últimos 6 bits libres para el segundo número.
+
+- El segundo número se obtiene a partir del operador \texttt{and} entre el índice obtenido previamente y la máscara \texttt{00111111} o \texttt{0x3F}.
+
+Al finalizar estos 3 casos se vuelve al \texttt{Caso 1} y se renueva el ciclo.
+
+A medida que se fueron obteniendo los distintos números se escribieron en el archivo de salida o en la salida stdout, según corresponda. En caso de encontrar un \texttt{=} o \texttt{==} significa la finalización de la lectura.
+
+\section{Comandos para compilar el programa}
+
+Acá debería ponerse lo correspondiente para compilar en linux o netbsd? Sin optimizaciones o con optimizaciones?
+
+\section{Corridas de prueba}
+
+Qué ponemos? El código que pasó Mati del archivo aleatorio?
+
+\section{Código fuente en C}
 
 
+\section{Código MIPS32 generado por el compilador}
 
-
-\subsection{Este es el Título de Otra Subsección}
-
-Texto de la otra subsección...
-
+Agregar
 
 \section{Conclusiones}
 
 Se presentó un modelo para que los alumnos puedan tomar como referencia en la redacción de sus informes de trabajos prácticos.
-
 
 \begin{thebibliography}{99}
 
