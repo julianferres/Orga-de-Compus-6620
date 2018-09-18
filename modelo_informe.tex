@@ -28,13 +28,13 @@ Se propone como objetivo del Trabajo Práctico familiarizarse con las herramienta
 \end{abstract}
 
 \section{Introducción}
-Se propone escribir un programa en lenguaje C que codifique o decodifique información de base64. Se cuentan con una serie de comandos básicos para el desarrollo del programa que serán detallados en el subtítulo de \mathit{Implementacion}. El objetivo principal del programa consiste en realizar una acción que puede ser codificar o decodificar a partir de un archivo de entrada y generar un archivo de salida. En caso de no recibir los nombres de archivos se utiliza por defecto los streams standar stdin y stdout.
+Se propone escribir un programa en lenguaje C que codifique o decodifique información de base64. Se cuentan con una serie de comandos básicos para el desarrollo del programa que serán detallados en el subtítulo de Implementacion. El objetivo principal del programa consiste en realizar una acción que puede ser codificar o decodificar a partir de un archivo de entrada y generar un archivo de salida. En caso de no recibir los nombres de archivos se utiliza por defecto los streams standar stdin y stdout.
 
 \section{Documentación relevante al diseño e implementación del programa}
 
 A partir de la consigna se determina que los comandos que debe incluir el programa son:
 
-\texttt{\mathtt{-h, --help Despliega el menú de ayuda}}
+\texttt{-h, --help Despliega el menú de ayuda}
 
 \texttt{-V, --version Imprime la versión y cierra el programa}
 
@@ -42,7 +42,7 @@ A partir de la consigna se determina que los comandos que debe incluir el progra
 
 \texttt{-o, --output Determina la ubicación del archivo de salida}
 
-\texttt{-a, --action Determina la acción que ejecuta el programa: decodificar o codificar}
+\texttt{-a, --action Determina la acción que ejecuta el programa: codificar (por defecto) o decodificar}
 
 \subsection{Diseño}
 
@@ -54,11 +54,12 @@ Las acciones de codificar y decodificar se separan en funciones distintas y se i
 
 \subsection{Función encode}
 
-La función \texttt{encode} plantea un problema que radica en leer 6 bits cuando las funciones en C leen de a 1 byte como mínima unidad. Se utiliza la función \texttt{fgetc} que lee de a 1 carácter, es decir, 1 byte y se emplean las llamadas máscaras que permiten obtener los bits necesarios para procesar la información. Además, para acomodar los mismos a las posiciones que sean necesarias en cada caso se utilizan los operadores \texttt{>>} o \texttt{<<} que simbolizan \texttt{shift right} o \texttt{shift left} respectivamente. Todos los números obtenidos se utilizan como índice de la tabla de b64 para realizar la traducción y se escribe de la misma al archivo de salida o a stdout.
+La función \texttt{encode} plantea un problema que radica en leer 6 bits cuando las funciones en C leen de a 1 byte como mínima unidad. Se utiliza la función \texttt{fgetc} que lee de a 1 carácter, es decir, 1 byte y se emplean las llamadas máscaras que permiten obtener los bits necesarios para procesar la información. Además, para acomodar los mismos a las posiciones que sean necesarias en cada caso se utilizan los operadores $>>$ o $<<$ que simbolizan \texttt{shift right} o \texttt{shift left} respectivamente. Todos los números obtenidos se utilizan como índice de la tabla de b64 para realizar la traducción y se escribe de la misma al archivo de salida o a stdout.
+\\
 
-\underline{Caso 1}: Se leen 8 bits y se desean obtener los primeros 6. Para ello se utiliza el operador \texttt{and} entre el carácter obtenido y la máscara \texttt{11111100} o \texttt{0xFC} y se realiza un shift de dos posiciones a la derecha para que esos 6 bits se localicen en los últimas 6 posiciones. 
+\underline{Caso 1}: Se leen 8 bits y se desean obtener los primeros 6. Para ello se utiliza el operador \texttt{and} entre el carácter obtenido y la máscara \texttt{11111100} o \texttt{0xFC} y se realiza un shift de dos posiciones a la derecha para que esos 6 bits se localicen en los últimas 6 posiciones. \\
 
-\underline{Caso 2}: Se leen los próximos 8 bits. Se forman 6 bits a partir de los 2 bits sobrantes del \texttt{Caso 1} y de los 4 primeros bits del carácter leído en este caso. Los 2 bits sobrantes se obtienen con el operador \texttt{and} entre el carácter obtenido en el \texttt{Caso 1} y la máscara \texttt{00000011} o \texttt{0x03}. Se realiza un shift de cuatro posiciones a la izquierda ya que deben dejar libres las últimas posiciones para los 4 bits mencionados. Los cuatro restantes se forman a partir del operador \texttt{and} entre el carácter leído en este caso y la máscara \texttt{11110000} o \texttt{0xF0}. Se realiza un shift de cuatro posiciones a la derecha ya que deben ser los últimos 4 bits del número formado. Para armar el número de 6 bits a partir de estas dos descomposiciones se utiliza el operador \texttt{|} entre ambas variables.
+\underline{Caso 2}: Se leen los próximos 8 bits. Se forman 6 bits a partir de los 2 bits sobrantes del \texttt{Caso 1} y de los 4 primeros bits del carácter leído en este caso. Los 2 bits sobrantes se obtienen con el operador \texttt{and} entre el carácter obtenido en el \texttt{Caso 1} y la máscara \texttt{00000011} o \texttt{0x03}. Se realiza un shift de cuatro posiciones a la izquierda ya que deben dejar libres las últimas posiciones para los 4 bits mencionados. Los cuatro restantes se forman a partir del operador \texttt{and} entre el carácter leído en este caso y la máscara \texttt{11110000} o \texttt{0xF0}. Se realiza un shift de cuatro posiciones a la derecha ya que deben ser los últimos 4 bits del número formado. Para armar el número de 6 bits a partir de estas dos descomposiciones se utiliza el operador \texttt{|} entre ambas variables. \\
 
 \underline{Caso 3}: Se leen los próximos 8 bits. En este caso se formarán dos números. El primero con los 4 bits restantes del \texttt{Caso 2} y los primeros 2 bits del carácter leído en este caso. El segundo con los últimos 6 bits del carácter leído en 
 este caso. 
@@ -79,19 +80,19 @@ En caso de tener 2 o 4 bits faltantes se rellenan con ceros y se agrega un \text
 
 La función \texttt{decode} plantea el problema de leer un carácter que proviene de la base64. Para traducirlo al número del cual proviene (1 a 64) se utiliza una función auxiliar que devuelve el índice de la tabla formato b64 al que corresponde dicho carácter. Siempre se trabajarán con dichos números y se los tratará como números de 6 bits. Como la lectura es de a 8 bits, los primeros 2 bits serán siempre 0. Se utiliza la función \texttt{fgetc} que lee de a 1 carácter, es decir, 1 byte y se emplean al igual que en el \texttt{encode} las llamadas máscaras y las operaciones de shift para acomodar los números a las posiciones determinadas en cada caso. 
 
-Se distinguen 3 casos:
+Se distinguen 3 casos:\\
 
 \underline{Caso 1}: Se utilizan los 6 bits del número obtenido con la función auxiliar y se traduce el próximo carácter a leer a través de la función auxiliar mencionada de la cual se obtienen también otros 6 bits. De esta manera, el número de 8 bytes se construye con el operador \texttt{|} entre los 6 bits del primero y los primeros 2 bits del segundo.
 
 - El primero se forma a partir de un shift a izquiera de 2 posiciones para dejar libre dichas posiciones a los primeros 2 bits del segundo número formado.
 
-- El segundo número se forma a partir del operador \texttt{and} entre el segundo indice obtenido a través de la función auxiliar y la máscara \texttt{00110000} o \texttt{0x30}. Se realiza un shift de 4 posiciones a la derecha para que queden localizados en las dos últimas posiciones.
+- El segundo número se forma a partir del operador \texttt{and} entre el segundo indice obtenido a través de la función auxiliar y la máscara \texttt{00110000} o \texttt{0x30}. Se realiza un shift de 4 posiciones a la derecha para que queden localizados en las dos últimas posiciones.\\
 
 \underline{Caso 2}: Se utilizan los 4 bits que sobraron del \texttt{Caso 1} y se lee el próximo carácter, del cual se obtiene el índice de la tabla B64 con la función auxiliar mencionada y se utilizan los primeros 4 bits. Se utiliza el operador \texttt{|} para unificar ambos números.
 
 - Para obtener el primer número se realiza un shift a izquierda de 4 posiciones para dejar libres las últimas 4 posiciones para el segundo número.
 
-- Para obtener el segundo número se utiliza el operador \texttt{and} entre el índice devuelto por la función auxiliar en este caso y la máscara \texttt{00111100} o \texttt{0x3C}. Se utiliza esa máscara porque los primeros 2 bits siempre son 0, como fue mencionado anteriormente. Para que esos 4 bits se ubiquen en las últimas 4 posiciones se realiza un shift a derecha de valor 2.
+- Para obtener el segundo número se utiliza el operador \texttt{and} entre el índice devuelto por la función auxiliar en este caso y la máscara \texttt{00111100} o \texttt{0x3C}. Se utiliza esa máscara porque los primeros 2 bits siempre son 0, como fue mencionado anteriormente. Para que esos 4 bits se ubiquen en las últimas 4 posiciones se realiza un shift a derecha de valor 2.\\
 
 \underline{Caso 3}: Se utilizan los 2 bits sobrantes del \texttt{Caso 2} y se lee un nuevo carácter, que se traduce a partir de la función auxiliar mencionada a un nuevo índice entre 0 y 64 del cual se toman los 6 bits del mismo. Ambos números se utilizan con el operador \texttt{|}.
 
@@ -109,14 +110,14 @@ En esta sección se detallan los pasos para compilar el programa en NetBSD a part
 
 \begin{itemize}
 	\item Desde el directorio donde se instaló GXemul se corre el siguiente comando para bootear la imagen del disco patrón:
-	\texttt{hostOS# ./gxemul -e 3max -d netbsd-pmax.img} 
+	\texttt{hostOS\# ./gxemul -e 3max -d netbsd-pmax.img} 
 	\item Desde otra consola de linux se crea en el host OS con el usuario root un alias para la interfaz loopback (lo:0) con la IP 172.20.0.1 con el siguiente comando:
-	\texttt{hostOS# ifconfig lo:0 172.20.0.1}
+	\texttt{hostOS\# ifconfig lo:0 172.20.0.1}
 	\item Luego se ejecutan los siguientes comandos para la conexión contra la interfaz creada: 
 	
-	\texttt{hostOS# export TERM=xterm}
+	\texttt{hostOS\# export TERM=xterm}
 	
-	\texttt{hostOS# ssh -p 2222 root@127.0.0.1}
+	\texttt{hostOS\# ssh -p 2222 root@127.0.0.1}
 	
 	\item Se transfieren los archivos a compilar a NetBSD con los siguientes comandos:
 	
@@ -124,15 +125,15 @@ En esta sección se detallan los pasos para compilar el programa en NetBSD a part
 			 
 	\item Luego se ejecutan los siguientes comandos para realizar la compilación y extraer el código MIPS generado por el compilador en el sistema operativo que corre sobre GXemul:
 	
-	\texttt{root@:~# ls}
+	\texttt{root@:~\# ls}
 	
-	\texttt{root@:~# pwd}
+	\texttt{root@:~\# pwd}
 	
-	\texttt{root@:~# mkdir TP0NetBSD}
+	\texttt{root@:~\# mkdir TP0NetBSD}
 	
-	\texttt{root@:~# cd TP0NetBSD}
+	\texttt{root@:~\# cd TP0NetBSD}
 	
-	\texttt{root@:~/TP0NetBSD/TP0# gcc -Wall -O0 -S -mrnames *.c}
+	\texttt{root@:~/TP0NetBSD/TP0\# gcc -Wall -O0 -S -mrnames *.c}
 	
 	\begin{itemize}
 		\item \texttt{-s} para detener el compilador luego de generar el código assembly.
@@ -143,7 +144,7 @@ En esta sección se detallan los pasos para compilar el programa en NetBSD a part
 
 	\item Luego se transfiere el archivo .s para el sistema operativo sobre el cual corre GXemul:
 	
-	\texttt{hostOS# scp -P2222 root@127.0.0.1:/root/TP0NetBSD/TP0/*.s /home/user}
+	\texttt{hostOS\# scp -P2222 root@127.0.0.1:/root/TP0NetBSD/TP0/*.s /home/user}
 \end{itemize}
 
 \section{Corridas de prueba}
@@ -195,7 +196,8 @@ int main (int argc, char const *argv[]) {
 	FILE* wfp = stdout;
 	int option_index = 0;
 
-	while ((opt = getopt_long(argc, argv, "Vha:i:o:", long_options, &option_index)) != -1) { 
+	while ((opt = getopt_long(argc, argv, "Vha:i:o:",
+	 long_options, &option_index)) != -1) { 
 		
 		bool isencode;
 		switch (opt) {
@@ -247,10 +249,11 @@ int main (int argc, char const *argv[]) {
 #include "code.h"
 
 //Definición de la tabla B64
-const char B64[64]= {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 
-'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x',
-'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
+const char B64[64]= {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
+ 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b',
+ 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
+ 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7',
+ '8', '9', '+', '/'};
 
 encode(FILE* fp, FILE* wfp) {
 
@@ -755,12 +758,20 @@ En conclusión, se cumplió el objetivo del Trabajo Práctico ya que se desarrolló 
 
 \begin{thebibliography}{99}
 
-\bibitem{INT06} Intel Technology \& Research, ``Hyper-Threading Technology,'' 2006, http://www.intel.com/technology/hyperthread/.
+\bibitem{INT06} GXemul, http://gavare.se/gxemul/.
 
 \bibitem{HEN00} J. L. Hennessy and D. A. Patterson, ``Computer Architecture. A Quantitative
 Approach,'' 3ra Edición, Morgan Kaufmann Publishers, 2000.
 
 \bibitem{LAR92} J. Larus and T. Ball, ``Rewriting Executable Files to Mesure Program Behavior,'' Tech. Report 1083, Univ. of Wisconsin, 1992.
+
+\bibitem{LAR92} The NetBSD project, http://www.netbsd.org/.
+
+\bibitem{LAR92} Base64 (Wikipedia), http://en.wikipedia.org/wiki/Base64
+
+\bibitem{LAR92} Base64 Enconde and Decode - Online, https://www.base64encode.org/
+
+\bibitem{LAR92} Getopt Long Option Example (The GNU C library), https://www.gnu.org/
 
 \end{thebibliography}
 
