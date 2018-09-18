@@ -6,12 +6,12 @@
 
 \title{	\textbf{Trabajo Práctico \#0:\\ Infraestructura básica}}
 
-\author{	Nombre y Apellido de Autor, \textit{Padrón Nro. 00.000}                     \\
-            \texttt{ dirección de e-mail }                                              \\[2.5ex]
-            Nombre y Apellido de Autor, \textit{Padrón Nro. 00.000}                     \\
-            \texttt{ dirección de e-mail }                                              \\[2.5ex]
-            Nombre y Apellido de Autor, \textit{Padrón Nro. 00.000}                     \\
-            \texttt{ dirección de e-mail }                                              \\[2.5ex]
+\author{	Julian Ferres, \textit{Padrón Nro. 101483}                     \\
+            \texttt{julianferres@gmail.com}                                              \\[2.5ex]
+            Cecilia María Hortas, \textit{Padrón Nro. 100687}                     \\
+            \texttt{ceci.hortas@gmail.com}                                              \\[2.5ex]
+            Matías Ezequiel Scakosky, \textit{Padrón Nro. 99627}                     \\
+            \texttt{scakosky@hotmail.com}                                              \\[2.5ex]
             \normalsize{2do. Cuatrimestre de 2018}                                      \\
             \normalsize{66.20 Organización de Computadoras  $-$ Práctica Martes}  \\
             \normalsize{Facultad de Ingeniería, Universidad de Buenos Aires}            \\
@@ -23,25 +23,57 @@
 \maketitle
 \thispagestyle{empty}   % quita el número en la primer página
 
-
 \begin{abstract}
-Este artículo es un modelo que proporciona a los alumnos las instrucciones necesarias para preparar sus informes para la asignatura \textit{66.20 Organización de Computadoras} (práctica Viernes). El informe podrá contener (optativo) un resumen de no más de 150 palabras. La primera página del artículo deberá seguir el formato que se ilustra en el presente modelo y deberá contener el título, los nombres de los autores, sus números de padrón, sus direcciones de e-mail, y el resumen (si tuviese). La primera página del informe no debe ser numerada.
+Se propone como objetivo del Trabajo Práctico 0 familiarizarse con las herramientas de software que serán utilizadas a lo largo de la cursada. Para eso se plantea la realización de un programa en lenguaje C para codificar y decodificar información en base64. Se utiliza el programa GXemul para simular el entorno de desarrollo, una máquina MIPS que corre una versión de NetBSD.
 \end{abstract}
 
-
 \section{Introducción}
+Se propone escribir un programa en lenguaje C que codifique o decodifique información de base64. Se cuentan con una serie de comandos básicos para el desarrollo del programa que serán detallados en el subtítulo de \mathit{Implementacion}. El objetivo principal del programa consiste en realizar una acción que puede ser codificar o decodificar a partir de un archivo de entrada y generar un archivo de salida. En caso de no recibir los nombres de archivos se utiliza por defecto los streams standar stdin y stdout.
 
-Este artículo es un modelo que proporciona a los alumnos las instrucciones necesarias para preparar sus informes para la asignatura \textit{66.20 Organización de Computadoras} (práctica Viernes). Además de la estructura presentada, el informe podría contener otras secciones y subsecciones, a continuación de la introducción. Podrá  incluir (se recomienda) gráficos ilustrativos y/o tablas. El informe finaliza con una sección de conclusiones, y las citas bibliográficas consultadas siguiendo, rigurosamente, el formato presentado al final de este modelo. También se recomienda respectar el estilo tipográfico mostrado aquí (fuente Times Roman de 10 puntos, u otras similares)
+\section{Documentación relevante al diseño e implementación del programa}
 
+A partir de la consigna se determina que los comandos que debe incluir el programa son:
 
-\section{Este es el Título de una Sección}
+\texttt{\mathtt{-h, --help Despliega el menú de ayuda}}
 
-Texto de la sección...
+\texttt{-V, --version Imprime la versión y cierra el programa}
 
-\subsection{Este es el Título de una Subsección}
+\texttt{-i, --input Determina la ubicación del archivo de entrada}
 
-Texto de la subsección...
+\texttt{-o, --output Determina la ubicación del archivo de salida}
 
+\texttt{-a, --action Determina la acción que ejecuta el programa: decodificar o codificar}
+
+\subsection{Diseño}
+
+El programa principal se encuentra desarrollado en la función \texttt{main}. Se detalla todo lo relativo al manejo de los comandos y se utiliza la libería \texttt{getopt.h}. Se guarda en el archivo \texttt{main.c}
+
+Las acciones de codificar y decodificar se separan en funciones distintas y se implementan siguiendo una lógica similar. Ambas están en el archivo \texttt{code.c}
+
+\subsection{Detalle de implementación}
+
+\subsection{Función encode}
+
+La función \texttt{encode} plantea un problema que radica en leer 6 bits cuando las funciones en C leen de a 1 byte como mínima unidad. Se utiliza la función \texttt{fgetc} que lee de a 1 carácter, es decir, 1 byte y se emplean las llamadas máscaras que permiten obtener los bits necesarios para procesar la información. Además, para acomodar los mismos a las posiciones que sean necesarias en cada caso se utilizan los operadores \texttt{>>} o \texttt{<<} que simbolizan \texttt{shift right} o \texttt{shift left} respectivamente.
+
+\underline{Caso 1}: Se leen 8 bits y se desean obtener los primeros 6. Para ello se utiliza el operador \texttt{and} entre el carácter obtenido y la máscara \texttt{11111100} o \texttt{0xFC} y se realiza un shift de dos posiciones a la derecha para que esos 6 bits se localicen en los últimas 6 posiciones. 
+
+\underline{Caso 2}: Se leen los próximos 8 bits. Se forman 6 bits a partir de los 2 bits sobrantes del \texttt{Caso 1} y de los 4 primeros bits del carácter leído en este caso. Los 2 bits sobrantes se obtienen con el operador \texttt{and} entre el carácter obtenido en el \texttt{Caso 1} y la máscara \texttt{00000011} o \texttt{0x03}. Se realiza un shift de cuatro posiciones a la izquierda ya que deben dejar libres las últimas posiciones para los 4 bits mencionados. Los cuatro restantes se forman a partir del operador \texttt{and} entre el carácter leído en este caso y la máscara \texttt{11110000} o \texttt{0xF0}. Se realiza un shift de cuatro posiciones a la derecha ya que deben ser los últimos 4 bits del número formado. Para armar el número de 6 bits a partir de estas dos descomposiciones se utiliza el operador \texttt{|} entre ambas variables.
+
+\underline{Caso 3}: Se leen los próximos 8 bits. En este caso se formarán dos números. El primero con los 4 bits restantes del \texttt{Caso 2} y los primeros 2 bits del carácter leído en este caso. El segundo con los últimos 6 bits del carácter leído en 
+este caso. 
+
+Para obtener el primer número se utiliza el operador \texttt{|} entre dos variables:
+
+-La primera se forma con los 4 bits restantes del carácter del \texttt{Caso 2}. Para ello se utiliza el operador \texttt{and} entre dicho carácter y la máscara \texttt{00001111} o \texttt{0x0F}. Además se utiliza un shift a izquierda de 2 posiciones para dejar libre las posiciones de los 2 carácteres restantes.
+
+-La segunda se forma con los primeros 2 bits del carácter leído en este caso. Para ello se utiliza el operador \texttt{and} entre dicho carácter y la máscara \texttt{11000000} o \texttt{0xC0}. Se realiza un shift a derecha de 6 posiciones para que queden posicionados dichos bits en las últimas posiciones.
+
+Para obtener el segundo número se utiliza el operador \texttt{and} entre el carácter leído en este caso y la máscara \texttt{00111111} o \texttt{0x3F} para obtener los últimos 6 bits.
+
+Al finalizar estos 3 casos se vuelve al \texttt{Caso 1} y se renueva el ciclo.
+
+\subsection{Función decode}
 
 \section{Este es el Título de Otra Sección}
 
