@@ -27,9 +27,9 @@ int main (int argc, char const *argv[]) {
     FILE* wfp = stdout;
     char* const* buffer = (char* const*) argv;
     int option_index = 0;
-
+    bool isencode = true;
     while ((opt = getopt_long(argc, buffer, "Vha:i:o:", long_options, &option_index)) != -1) { 
-    	bool isencode = true;
+
 
     	switch (opt) {
 
@@ -43,38 +43,34 @@ int main (int argc, char const *argv[]) {
 
     		case 'a': 
     			if (! strcmp(optarg, "encode")) { 
-    				isencode = true;
+    				continue;
     			}	
     			if (! strcmp(optarg, "decode")) {
     				isencode = false;
+                    continue;
     			}
 
     		case 'i': 
-    			if (argc >= 5) { 
-                    if (strcmp(argv[4], "-")) {fp = stdin; continue;}
-    				fp = fopen(argv[4], "r"); 
-    				if(! fp) { fprintf(stderr, "File not found \n"); }
-    			}
-                else {continue; }
+                if (! strcmp(optarg,"-")) continue;
+    			fp = fopen(optarg, "r");
+    			if(! fp) { fprintf(stderr, "File not found \n"); }
+                continue;
+
 
     		case 'o': 
-    			if (argc >= 7) {
-                    if (strcmp(argv[6], "-")) {wfp = stdout; continue;}
-    				wfp = fopen(argv[6], "w"); 
-    				if(! wfp) { fprintf(stderr, "File Error \n"); }
-    			}
+                if (! strcmp(optarg,"-")) continue;
+                wfp = fopen(optarg, "w");
+                if(! wfp) { fprintf(stderr, "File not found \n"); }
     			break;
 
     		case 0:
     			abort();
     	}
-    	if(isencode) encode(fp, wfp);
-    	else decode(fp, wfp);
-    	fclose(fp);
-    	fclose(wfp); 
-    	return 0;
-    }
 
-    encode(fp, wfp); //Accion por default
+    }
+    if(isencode) encode(fp, wfp);
+    else decode(fp, wfp);
+    fclose(fp);
+    fclose(wfp); 
     return 0;
 }
