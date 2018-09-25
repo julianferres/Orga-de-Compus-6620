@@ -1,4 +1,3 @@
-\babel@toc {spanish}{}
 \contentsline {section}{\numberline {1}Introducci\'on}{3}{section.1}
 \contentsline {section}{\numberline {2}Documentaci\'on relevante al dise\~no e implementaci\'on del programa}{3}{section.2}
 \contentsline {subsection}{\numberline {2.1}Dise\~no}{3}{subsection.2.1}

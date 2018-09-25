@@ -2,7 +2,6 @@
 \usepackage{fancyvrb}
 \usepackage{graphicx}
 \usepackage[ansinew]{inputenc}
-\usepackage[spanish]{babel}
 \usepackage{hyperref}
 
 \title{	\textbf{Trabajo Práctico \#0:\\ Infraestructura básica}}
@@ -204,54 +203,55 @@ int main (int argc, char const *argv[]) {
 	int opt;
 	FILE* fp = stdin;
 	FILE* wfp = stdout;
+	char* const* buffer = (char* const*) argv;
 	int option_index = 0;
-
-	while ((opt = getopt_long(argc, argv, "Vha:i:o:",
-	 long_options, &option_index)) != -1) { 
-		
-		bool isencode;
+	bool isencode = true;
+	while ((opt = getopt_long(argc, buffer, "Vha:i:o:", long_options, &option_index)) != -1) { 
+	
 		switch (opt) {
-
+	
 			case 'h':
 				fprintf(stdout, HELP);
 				return 0;
+	
 			case 'V':
 				fprintf(stdout, VERSION);
 				return 0;
+	
+			
 			case 'a': 
 				if (! strcmp(optarg, "encode")) { 
-					isencode = true;
+					continue;
 				}	
 				if (! strcmp(optarg, "decode")) {
 					isencode = false;
+					continue;
 				}
+	
 			case 'i': 
-				if (argc >= 5) { 
-					fp = fopen(argv[4], "r"); 
-				if(! fp) {
-					 fprintf(stderr, "File not found \n"); 
-				}
-				}
+				if (! strcmp(optarg,"-")) continue;
+				fp = fopen(optarg, "r");
+				if(! fp) { fprintf(stderr, "File not found \n"); return 1; }
+				continue;
+	
+	
 			case 'o': 
-				if (argc >= 7) { 
-					wfp = fopen(argv[6], "w"); 
-				if(! wfp) { 
-					fprintf(stderr, "File Error \n"); 
-				}
-				}
+				if (! strcmp(optarg,"-")) continue;
+				wfp = fopen(optarg, "w");
+				if(! wfp) { fprintf(stderr, "File not found \n"); return 1; }
 				break;
+	
 			case 0:
 				abort();
 		}
-		if(isencode) encode(fp, wfp);
-		else decode(fp, wfp);
-		fclose(fp);
-		fclose(wfp); 
-		return 0;
 	}
-	encode(fp, wfp); //Accion por default
+	if(isencode) encode(fp, wfp);
+	else decode(fp, wfp);
+	fclose(fp);
+	fclose(wfp); 
 	return 0;
 }
+
 \end{Verbatim}
 
 \subsection{code.c}
@@ -337,9 +337,11 @@ encode(FILE* fp, FILE* wfp) {
 }
 
 
-int get_i64(unsigned char c) { 
+unsigned char get_i64(unsigned char c) { 
 	for(int i=0; i<64; i++){
-	if(B64[i] == c) return i;
+	if(B64[i] == c) {
+		unsigned char resultado = (unsigned char) i;
+		return resultado;	
 	}
 	return -1;
 }
@@ -367,9 +369,9 @@ void decode(FILE* fp, FILE* wfp) {
 			if(caracter == -1) break;
 			
 			unsigned char ascii_index = (unsigned char) caracter;
-			b = (unsigned char)get_i64(ascii_index); 
+			b = get_i64(ascii_index); 
 
-			a = a << 2; 
+			a = (unsigned char) (a << 2); 
 			a = a | ((b & mask1) >> 4);
 	
 			fprintf(wfp, "%c", a);
@@ -382,9 +384,9 @@ void decode(FILE* fp, FILE* wfp) {
 			if(caracter == '=') break;
 
 			unsigned char ascii_index = (unsigned char) caracter;
-			c = (unsigned char)get_i64(ascii_index); 
+			c = get_i64(ascii_index); 
 
-			b = b << 4;
+			b = (unsigned char) (b << 4);
 			b = b | ((c & mask2) >> 2);
 
 			fprintf(wfp, "%c", b);
@@ -399,11 +401,11 @@ void decode(FILE* fp, FILE* wfp) {
 			unsigned char ascii_index = (unsigned char) caracter;
 			d = (unsigned char)get_i64(ascii_index); 	
 
-			c = c << 6;
+			c = (unsigned char) (c << 6);
 			c = c | (d & mask3);
 
 			fprintf(wfp, "%c", c);
-			a = (unsigned char) get_i64(fgetc(fp)) ;
+			a = get_i64(fgetc(fp)) ;
 			contador = 0;
 			continue;
 		}			
