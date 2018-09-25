@@ -7,7 +7,7 @@
 #include <stdbool.h>
 
 void encode(FILE* fp, FILE* wfp);
-int get_i64(unsigned char c);
+unsigned char get_i64(unsigned char c);
 void decode(FILE* fp, FILE* wfp);
 
 #endif

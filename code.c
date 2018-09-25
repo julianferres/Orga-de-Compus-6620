@@ -5,7 +5,7 @@ const char B64[64]= {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
 
-encode(FILE* fp, FILE* wfp) {
+void encode(FILE* fp, FILE* wfp) {
 
 	//Definición de las máscaras a utilizar
 	unsigned char a1mask = 0xFC;
@@ -77,10 +77,11 @@ encode(FILE* fp, FILE* wfp) {
 }
 
 
-int get_i64(unsigned char c) { 
+unsigned char get_i64(unsigned char c) { 
 	for(int i=0; i<64; i++){
 		if(B64[i] == c) {
-		return i;
+			unsigned char resultado = (unsigned char) i;
+			return resultado;
 		}
 	}
 	return -1;
@@ -99,7 +100,7 @@ void decode(FILE* fp, FILE* wfp) {
 	
 	int caracter = fgetc(fp);
 	unsigned char ascii_index = (unsigned char) caracter;
-	a = (unsigned char)get_i64(ascii_index);
+	a = get_i64(ascii_index);
 
 	while(caracter != EOF ) {
 		
@@ -108,9 +109,8 @@ void decode(FILE* fp, FILE* wfp) {
 			if(caracter == -1) break;
 			
 			unsigned char ascii_index = (unsigned char) caracter;
-			b = (unsigned char)get_i64(ascii_index); 
-
-			a = a << 2; 
+			b = get_i64(ascii_index); 
+			a = (unsigned char) (a << 2); 
 			a = a | ((b & mask1) >> 4);
 
 			fprintf(wfp, "%c", a);
@@ -123,9 +123,9 @@ void decode(FILE* fp, FILE* wfp) {
 			if(caracter == '=') break;
 
 			unsigned char ascii_index = (unsigned char) caracter;
-			c = (unsigned char)get_i64(ascii_index); 
+			c = get_i64(ascii_index); 
 
-			b = b << 4;
+			b = (unsigned char) (b << 4);
 			b = b | ((c & mask2) >> 2);
 
 			fprintf(wfp, "%c", b);
@@ -138,13 +138,16 @@ void decode(FILE* fp, FILE* wfp) {
 			if (caracter == '=') break;
 
 			unsigned char ascii_index = (unsigned char) caracter;
-			d = (unsigned char)get_i64(ascii_index); 	
+			d = get_i64(ascii_index); 	
 
-			c = c << 6;
+			c = (unsigned char) (c << 6);
 			c = c | (d & mask3);
 
 			fprintf(wfp, "%c", c);
-			a = (unsigned char) get_i64(fgetc(fp)) ;
+
+			caracter = fgetc(fp);
+			ascii_index = (unsigned char) caracter;
+			a = get_i64(ascii_index) ;
 			contador = 0;
 			continue;
 		}			
