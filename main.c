@@ -29,7 +29,7 @@ int main (int argc, char const *argv[]) {
     int option_index = 0;
 
     while ((opt = getopt_long(argc, buffer, "Vha:i:o:", long_options, &option_index)) != -1) { 
-    	bool isencode;
+    	bool isencode = true;
 
     	switch (opt) {
 
@@ -51,18 +51,18 @@ int main (int argc, char const *argv[]) {
 
     		case 'i': 
     			if (argc >= 5) { 
+                    if (strcmp(argv[4], "-")) {fp = stdin; continue;}
     				fp = fopen(argv[4], "r"); 
     				if(! fp) { fprintf(stderr, "File not found \n"); }
-    				return 0;
     			}
-                else{isencode=true; break;}
+                else {continue; }
 
     		case 'o': 
-    			if (argc >= 7) { 
+    			if (argc >= 7) {
+                    if (strcmp(argv[6], "-")) {wfp = stdout; continue;}
     				wfp = fopen(argv[6], "w"); 
     				if(! wfp) { fprintf(stderr, "File Error \n"); }
     			}
-                else{isencode=true; break;}
     			break;
 
     		case 0:
