@@ -25,9 +25,10 @@ int main (int argc, char const *argv[]) {
     int opt;
     FILE* fp = stdin;
     FILE* wfp = stdout;
+    char* const* buffer = (char* const*) argv;
     int option_index = 0;
 
-    while ((opt = getopt_long(argc, argv, "Vha:i:o:", long_options, &option_index)) != -1) { 
+    while ((opt = getopt_long(argc, buffer, "Vha:i:o:", long_options, &option_index)) != -1) { 
     	bool isencode;
 
     	switch (opt) {
