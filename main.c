@@ -54,12 +54,15 @@ int main (int argc, char const *argv[]) {
     				fp = fopen(argv[4], "r"); 
     				if(! fp) { fprintf(stderr, "File not found \n"); }
     			}
+                else{isencode=true; break;}
 
     		case 'o': 
-    			if (argc >= 7) { 
+    			if (argc >= 7) {
+                    //if (strcmp(argv[6], "-")) fp = stdin; 
     				wfp = fopen(argv[6], "w"); 
     				if(! wfp) { fprintf(stderr, "File Error \n"); }
     			}
+                else{isencode=true; break;}
     			break;
 
     		case 0:
