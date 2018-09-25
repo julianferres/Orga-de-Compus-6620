@@ -53,6 +53,7 @@ int main (int argc, char const *argv[]) {
     			if (argc >= 5) { 
     				fp = fopen(argv[4], "r"); 
     				if(! fp) { fprintf(stderr, "File not found \n"); }
+    				return 0;
     			}
                 else{isencode=true; break;}
 
