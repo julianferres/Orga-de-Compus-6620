@@ -58,8 +58,7 @@ int main (int argc, char const *argv[]) {
                 else{isencode=true; break;}
 
     		case 'o': 
-    			if (argc >= 7) {
-                    //if (strcmp(argv[6], "-")) fp = stdin; 
+    			if (argc >= 7) { 
     				wfp = fopen(argv[6], "w"); 
     				if(! wfp) { fprintf(stderr, "File Error \n"); }
     			}
