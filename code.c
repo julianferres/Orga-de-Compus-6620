@@ -17,9 +17,11 @@ int get_caracter(FILE* fp){
 
 void write_caracter(FILE* stream, const char ch){
 	int rc = fprintf(stream,"%c",ch);
-	if (rc < 0) 
+	fflush(stream);
+	if (rc < 0){
 	    fprintf(stderr,"El programa se detuvo debido al erorr de output numero: %d, \"%s\"\n", errno,strerror(errno));
 		exit(EXIT_FAILURE);
+		}
 	}
 
 void encode(FILE* fp, FILE* wfp) {
@@ -49,7 +51,7 @@ void encode(FILE* fp, FILE* wfp) {
 			a2 = (unsigned char) a2 << 4;
 
 			contador++;
-			fprintf (wfp,"%c",B64[a1]);
+			write_caracter(wfp,B64[a1]);
 			caracter = get_caracter(fp);
 			continue;
 		}
@@ -62,7 +64,7 @@ void encode(FILE* fp, FILE* wfp) {
 			b2 = (unsigned char)b2 << 2;	
 
 			contador++;
-			fprintf(wfp,"%c", B64[b1]);
+			write_caracter(wfp, B64[b1]);
 			caracter = get_caracter(fp);
 			continue;
 		}
@@ -74,8 +76,8 @@ void encode(FILE* fp, FILE* wfp) {
 			c2 = buffer & c2mask;
 
 			contador = 0;
-			fprintf(wfp,"%c", B64[c1]);
-			fprintf(wfp,"%c", B64[c2]);
+			write_caracter(wfp, B64[c1]);
+			write_caracter(wfp, B64[c2]);
 			caracter = get_caracter(fp);
 			continue;
 		}	
@@ -83,13 +85,13 @@ void encode(FILE* fp, FILE* wfp) {
 	
 	switch (contador) {
 		case 2:
-			fprintf(wfp,"%c", B64[b2]);
-			fprintf(wfp,"%c", '=');
+			write_caracter(wfp, B64[b2]);
+			write_caracter(wfp, '=');
 			break;
 		case 1:
-			fprintf(wfp,"%c", B64[a2]);
-			fprintf(wfp,"%c", '=');
-			fprintf(wfp,"%c", '=');
+			write_caracter(wfp, B64[a2]);
+			write_caracter(wfp, '=');
+			write_caracter(wfp, '=');
 			break;
 	}
 }
@@ -131,7 +133,7 @@ void decode(FILE* fp, FILE* wfp) {
 			a = (unsigned char) (a << 2); 
 			a = a | ((b & mask1) >> 4);
 
-			fprintf(wfp,"%c", a);
+			write_caracter(wfp, a);
 			contador++;
 			continue;
 		}
@@ -146,7 +148,7 @@ void decode(FILE* fp, FILE* wfp) {
 			b = (unsigned char) (b << 4);
 			b = b | ((c & mask2) >> 2);
 
-			fprintf(wfp,"%c", b);
+			write_caracter(wfp, b);
 			contador++;
 			continue;
 		}
@@ -161,7 +163,7 @@ void decode(FILE* fp, FILE* wfp) {
 			c = (unsigned char) (c << 6);
 			c = c | (d & mask3);
 
-			fprintf(wfp,"%c", c);
+			write_caracter(wfp, c);
 
 			caracter = get_caracter(fp);
 			ascii_index = (unsigned char) caracter;
