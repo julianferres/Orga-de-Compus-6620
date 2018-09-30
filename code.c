@@ -15,6 +15,13 @@ int get_caracter(FILE* fp){
 	return c;
 }
 
+void write_caracter(FILE* stream, const char ch){
+	int rc = fprintf(stream,"%c",ch);
+	if (rc < 0) 
+	    fprintf(stderr,"El programa se detuvo debido al erorr de output numero: %d, \"%s\"\n", errno,strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
 void encode(FILE* fp, FILE* wfp) {
 
 	//Definición de las máscaras a utilizar
@@ -42,7 +49,7 @@ void encode(FILE* fp, FILE* wfp) {
 			a2 = (unsigned char) a2 << 4;
 
 			contador++;
-			fprintf(wfp, "%c", B64[a1]);
+			fprintf (wfp,"%c",B64[a1]);
 			caracter = get_caracter(fp);
 			continue;
 		}
@@ -55,7 +62,7 @@ void encode(FILE* fp, FILE* wfp) {
 			b2 = (unsigned char)b2 << 2;	
 
 			contador++;
-			fprintf(wfp, "%c", B64[b1]);
+			fprintf(wfp,"%c", B64[b1]);
 			caracter = get_caracter(fp);
 			continue;
 		}
@@ -67,8 +74,8 @@ void encode(FILE* fp, FILE* wfp) {
 			c2 = buffer & c2mask;
 
 			contador = 0;
-			fprintf(wfp, "%c", B64[c1]);
-			fprintf(wfp, "%c", B64[c2]);
+			fprintf(wfp,"%c", B64[c1]);
+			fprintf(wfp,"%c", B64[c2]);
 			caracter = get_caracter(fp);
 			continue;
 		}	
@@ -76,12 +83,13 @@ void encode(FILE* fp, FILE* wfp) {
 	
 	switch (contador) {
 		case 2:
-			fprintf(wfp, "%c", B64[b2]);
-			fprintf(wfp, "=");
+			fprintf(wfp,"%c", B64[b2]);
+			fprintf(wfp,"%c", '=');
 			break;
 		case 1:
-			fprintf(wfp, "%c", B64[a2]);
-			fprintf(wfp, "==");
+			fprintf(wfp,"%c", B64[a2]);
+			fprintf(wfp,"%c", '=');
+			fprintf(wfp,"%c", '=');
 			break;
 	}
 }
@@ -123,7 +131,7 @@ void decode(FILE* fp, FILE* wfp) {
 			a = (unsigned char) (a << 2); 
 			a = a | ((b & mask1) >> 4);
 
-			fprintf(wfp, "%c", a);
+			fprintf(wfp,"%c", a);
 			contador++;
 			continue;
 		}
@@ -138,7 +146,7 @@ void decode(FILE* fp, FILE* wfp) {
 			b = (unsigned char) (b << 4);
 			b = b | ((c & mask2) >> 2);
 
-			fprintf(wfp, "%c", b);
+			fprintf(wfp,"%c", b);
 			contador++;
 			continue;
 		}
@@ -153,7 +161,7 @@ void decode(FILE* fp, FILE* wfp) {
 			c = (unsigned char) (c << 6);
 			c = c | (d & mask3);
 
-			fprintf(wfp, "%c", c);
+			fprintf(wfp,"%c", c);
 
 			caracter = get_caracter(fp);
 			ascii_index = (unsigned char) caracter;
