@@ -5,6 +5,16 @@ const char B64[64]= {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
 
+int get_caracter(FILE* fp){
+	int c = fgetc(fp);
+	if (c == EOF && ferror(fp)){
+	    int err = errno;
+	    fprintf(stderr, "El programa se detuvo debido al erorr de input numero: %d\n", err);
+	    exit(EXIT_FAILURE);
+	}
+	return c;
+}
+
 void encode(FILE* fp, FILE* wfp) {
 
 	//Definición de las máscaras a utilizar
@@ -19,7 +29,7 @@ void encode(FILE* fp, FILE* wfp) {
 	int contador = 0;
 	int a1, a2, b1, b2, c1, c2;
 	
-	int caracter = fgetc(fp);
+	int caracter = get_caracter(fp);
 	
 	while(caracter != EOF) {
 			
@@ -33,7 +43,7 @@ void encode(FILE* fp, FILE* wfp) {
 
 			contador++;
 			fprintf(wfp, "%c", B64[a1]);
-			caracter = fgetc(fp);
+			caracter = get_caracter(fp);
 			continue;
 		}
 
@@ -46,7 +56,7 @@ void encode(FILE* fp, FILE* wfp) {
 
 			contador++;
 			fprintf(wfp, "%c", B64[b1]);
-			caracter = fgetc(fp);
+			caracter = get_caracter(fp);
 			continue;
 		}
 
@@ -59,7 +69,7 @@ void encode(FILE* fp, FILE* wfp) {
 			contador = 0;
 			fprintf(wfp, "%c", B64[c1]);
 			fprintf(wfp, "%c", B64[c2]);
-			caracter = fgetc(fp);
+			caracter = get_caracter(fp);
 			continue;
 		}	
 	}
@@ -98,14 +108,14 @@ void decode(FILE* fp, FILE* wfp) {
 	int contador = 0;
 	unsigned char a, b, c, d; 
 	
-	int caracter = fgetc(fp);
+	int caracter = get_caracter(fp);
 	unsigned char ascii_index = (unsigned char) caracter;
 	a = get_i64(ascii_index);
 
 	while(caracter != EOF ) {
 		
 		if(contador == 0) {
-			caracter = fgetc(fp);
+			caracter = get_caracter(fp);
 			if(caracter == -1) break;
 			
 			unsigned char ascii_index = (unsigned char) caracter;
@@ -119,7 +129,7 @@ void decode(FILE* fp, FILE* wfp) {
 		}
 
 		if(contador == 1) {
-			caracter = fgetc(fp);
+			caracter = get_caracter(fp);
 			if(caracter == '=') break;
 
 			unsigned char ascii_index = (unsigned char) caracter;
@@ -134,7 +144,7 @@ void decode(FILE* fp, FILE* wfp) {
 		}
 
 		if(contador == 2) {
-			caracter = fgetc(fp);
+			caracter = get_caracter(fp);
 			if (caracter == '=') break;
 
 			unsigned char ascii_index = (unsigned char) caracter;
@@ -145,7 +155,7 @@ void decode(FILE* fp, FILE* wfp) {
 
 			fprintf(wfp, "%c", c);
 
-			caracter = fgetc(fp);
+			caracter = get_caracter(fp);
 			ascii_index = (unsigned char) caracter;
 			a = get_i64(ascii_index) ;
 			contador = 0;
