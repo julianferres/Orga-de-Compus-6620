@@ -12,7 +12,7 @@ const char HELP[] = "Usage:\n tp0 -h \n tp0 -V \n tp0 [options] \n Options: \n -
 const char VERSION[] = "2018.9.25 \n";
 
 int main (int argc, char const *argv[]) {
-	
+
 	static struct option long_options[] = {
             {"version",  no_argument, 0,  0 }, 
             {"help",  no_argument, 0,  0 },
