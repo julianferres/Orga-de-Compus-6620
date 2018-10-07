@@ -28,22 +28,22 @@ encode:
 	#Preparar los registros temporales
 
 	li t0,0 #cargo un 0 en t0 para usarlo de contador
-	sw t0,16($fp) #guardo t0 en el area de la pila de las variables locales
+	sw t0,16(sp) #guardo t0 en el area de la pila de las variables locales
 
 	li t1,1 #cargo un 1 en t1 para ir a caso1
-	sw t1,20($fp)
+	sw t1,20(sp)
 
 	li t2,2 #cargo un 2 en t2 para ir a caso2
-	sw t2,24($fp)
+	sw t2,24(sp)
 
 	#DUDOSO. Necesito cargar dos variables temporales para poder entrar a cada caso. 
 	#Los cargo inicialmente con 0 para ponerlos en la pila?
 
 	li t3,0 
-	sw t3,28($fp) 
+	sw t3,28(sp) 
 
 	li t4,0 
-	sw t4,32($fp)
+	sw t4,32(sp)
 
 	ba lectura
 
@@ -53,14 +53,14 @@ lectura:
 	jal t9 #salta a subrutina read_c
 
 	sw v0,36(sp) #guardo el resultado de la lectura en la pila
-	lw t5,36($fp) #en t5 está el carácter leído
+	lw t5,36(sp) #en t5 está el carácter leído
 
 	#Salvo registros que pueden haberse perdido con llamado a subrutina
-	lw t0,16($fp)
-	lw t1,20($fp)
-	lw t2,24($fp)
-	lw t3,28($fp)
-	lw t4,32($fp)
+	lw t0,16(sp)
+	lw t1,20(sp)
+	lw t2,24(sp)
+	lw t3,28(sp)
+	lw t4,32(sp)
 
 	ba ciclo 
 
@@ -75,14 +75,14 @@ ciclo:
 caso0:
 	and t3, t5, a1maske #a1 = buffer & a1mask; 
 	srl t3, t3, 2 #a1 = a1 >> 2;
-	sw t3,28($fp) #actualizo valor de la pila
+	sw t3,28(sp) #actualizo valor de la pila
 
 	and t4, t5, a2maske #a2 = buffer & a2mask;
 	sll t4, t4, 4 #	a2 = a2 << 4;
-	sw t4,32($fp) #actualizo valor de la pila
+	sw t4,32(sp) #actualizo valor de la pila
 
 	addi t0, t0, 1 #contador++. PUEDE FALLAR
-	sw t0,16($fp) #actualizo valor de la pila
+	sw t0,16(sp) #actualizo valor de la pila
 
 	ba escritura 
 	#Problema: no sé cómo pasar parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[a1]);
@@ -91,14 +91,14 @@ caso1:
 	and t3, t5, b1maske #b1 = buffer & b1mask;
 	srl t3, t3, 4 #b1 = b1 >> 4;
 	or t3, t3, t4 #b1 = b1 | a2; 
-	sw t3,28($fp) #actualizo valor de la pila
+	sw t3,28(sp) #actualizo valor de la pila
 
 	and t4, t5, b2maske #b2 = buffer & b2mask;
 	sll t4, t4, 2 #b2 = b2 << 2;	
-	sw t4,32($fp)
+	sw t4,32(sp)
 
 	addi t0, t0, 1 #contador++. PUEDE FALLAR
-	sw t0,16($fp) #actualizo valor de la pila
+	sw t0,16(sp) #actualizo valor de la pila
 
 	ba escritura
 	#Problema: no sé cómo pasar parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[b1]);
@@ -107,13 +107,13 @@ caso2:
 	and t3, t5, c1maske #c1 = buffer & c1mask;
 	srl t3, t3, 6 #c1 = c1 >> 6;
 	or t3, t3, t4 #c1 = c1 | b2;
-	sw t3,28($fp) #actualizo valor de la pila
+	sw t3,28(sp) #actualizo valor de la pila
 
 	and t4, t5, c2maske #c2 = buffer & c2mask;
-	sw t4,32($fp)
+	sw t4,32(sp)
 
 	li t0, 0 #contador = 0;
-	sw t0,16($fp)
+	sw t0,16(sp)
 
 	ba escritura
 	#Problema: no sé cómo pasar parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[c1]);
@@ -124,14 +124,14 @@ escritura:
 	jal t9 #salta a subrutina write_c
 
 	sw v0,40(sp) #guardo el resultado de la escritura en la pila
-	lw t6,40($fp) #en t6 está el resultado de la escritura ?
+	lw t6,40(sp) #en t6 está el resultado de la escritura ?
 
 	#Salvo registros que pueden haberse perdido con llamado a subrutina
-	lw t0,16($fp)
-	lw t1,20($fp)
-	lw t2,24($fp)
-	lw t3,28($fp)
-	lw t4,32($fp)
+	lw t0,16(sp)
+	lw t1,20(sp)
+	lw t2,24(sp)
+	lw t3,28(sp)
+	lw t4,32(sp)
 
 	ba lectura
 
@@ -192,25 +192,25 @@ decode:
 	#Preparar los registros temporales
 
 	li t0,0 #cargo un 0 en t0 para usarlo de contador
-	sw t0,16($fp) #guardo t0 en el area de la pila de las variables locales
+	sw t0,16(sp) #guardo t0 en el area de la pila de las variables locales
 
 	li t1,1 #cargo un 1 en t1 para ir a caso1
-	sw t1,20($fp)
+	sw t1,20(sp)
 
 	li t2,2 #cargo un 2 en t2 para ir a caso2
-	sw t2,24($fp)
+	sw t2,24(sp)
 
 	#DUDOSO. Necesito cargar dos variables temporales para poder entrar a cada caso. 
 	#Los cargo inicialmente con 0 para ponerlos en la pila?
 
 	li t3,5 #guardo numero distinto de 0
-	sw t3,28($fp) 
+	sw t3,28(sp) 
 
 	li t4,5 #guardo numero distinto de 0
-	sw t4,32($fp)
+	sw t4,32(sp)
 
 	li t5, 0 #completamente temporal
-	sw t5,36($fp)
+	sw t5,36(sp)
 
 	ba lectura_inicial
 
@@ -219,16 +219,16 @@ lectura_inicial:
 	jal t9 #salta a subrutina read_c
 
 	sw v0,28(sp) #guardo el resultado de la lectura en la pila
-	lw t3,28($fp) #en t3 está el carácter leído
+	lw t3,28(sp) #en t3 está el carácter leído
 	#PASAR A B64 LO QUE ESTÁ EN T3
 
 	#Salvo registros que pueden haberse perdido con llamado a subrutina
-	lw t0,16($fp)
-	lw t1,20($fp)
-	lw t2,24($fp)
-	lw t3,28($fp)
-	lw t4,32($fp)
-	lw t5,36($fp)
+	lw t0,16(sp)
+	lw t1,20(sp)
+	lw t2,24(sp)
+	lw t3,28(sp)
+	lw t4,32(sp)
+	lw t5,36(sp)
 
 	ba ciclo 
 
@@ -247,16 +247,16 @@ caso0:
 	jal t9 #salta a subrutina read_c
 
 	sw v0,32(sp) #guardo el resultado de la lectura en la pila
-	lw t4,32($fp) #en t4 está el carácter leído
+	lw t4,32(sp) #en t4 está el carácter leído
 	#PASAR A B64 LO QUE ESTÁ EN T4
 
 	#Salvo registros que pueden haberse perdido con llamado a subrutina
-	lw t0,16($fp)
-	lw t1,20($fp)
-	lw t2,24($fp)
-	lw t3,28($fp)
-	lw t4,32($fp)
-	lw t5,36($fp)
+	lw t0,16(sp)
+	lw t1,20(sp)
+	lw t2,24(sp)
+	lw t3,28(sp)
+	lw t4,32(sp)
+	lw t5,36(sp)
 
 	sll t3, t3, 2 #a = a << 2
 	and t5, t4, mask1d #b & mask1
@@ -274,17 +274,17 @@ caso1:
 	jal t9 #salta a subrutina read_c
 
 	sw v0,28(sp) #guardo el resultado de la lectura en la pila
-	lw t3,28($fp) #en t3 está el carácter leído
+	lw t3,28(sp) #en t3 está el carácter leído
 	#PASAR A B64 LO QUE ESTÁ EN T3
 	#Si es = ir a end
 
 	#Salvo registros que pueden haberse perdido con llamado a subrutina
-	lw t0,16($fp)
-	lw t1,20($fp)
-	lw t2,24($fp)
-	lw t3,28($fp)
-	lw t4,32($fp)
-	lw t5,36($fp)
+	lw t0,16(sp)
+	lw t1,20(sp)
+	lw t2,24(sp)
+	lw t3,28(sp)
+	lw t4,32(sp)
+	lw t5,36(sp)
 
 	sll t4, t4, 4 #b << 4
 	and t5, t3, mask2d #c & mask2
@@ -302,17 +302,17 @@ caso2:
 	jal t9 #salta a subrutina read_c
 
 	sw v0,32(sp) #guardo el resultado de la lectura en la pila
-	lw t4,32($fp) #en t4 está el carácter leído
+	lw t4,32(sp) #en t4 está el carácter leído
 	#PASAR A B64 LO QUE ESTÁ EN T4
 	#Si es = ir a end
 
 	#Salvo registros que pueden haberse perdido con llamado a subrutina
-	lw t0,16($fp)
-	lw t1,20($fp)
-	lw t2,24($fp)
-	lw t3,28($fp)
-	lw t4,32($fp)
-	lw t5,36($fp)	
+	lw t0,16(sp)
+	lw t1,20(sp)
+	lw t2,24(sp)
+	lw t3,28(sp)
+	lw t4,32(sp)
+	lw t5,36(sp)	
 
 	sll t3, t3, 6 #c << 6	
 	and t5, t4, mask3d	#d & mask3
@@ -325,16 +325,16 @@ caso2:
 	jal t9 #salta a subrutina read_c
 
 	sw v0,28(sp) #guardo el resultado de la lectura en la pila
-	lw t4,28($fp) #en t3 está el carácter leído
+	lw t4,28(sp) #en t3 está el carácter leído
 	#PASAR A B64 LO QUE ESTÁ EN T3
 
 	#Salvo registros que pueden haberse perdido con llamado a subrutina
-	lw t0,16($fp)
-	lw t1,20($fp)
-	lw t2,24($fp)
-	lw t3,28($fp)
-	lw t4,32($fp)
-	lw t5,36($fp)
+	lw t0,16(sp)
+	lw t1,20(sp)
+	lw t2,24(sp)
+	lw t3,28(sp)
+	lw t4,32(sp)
+	lw t5,36(sp)
 
 	li t0, 0 #contador = 0
 	ba ciclo #continue
