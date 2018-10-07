@@ -19,7 +19,7 @@ read_c:
 	sw $fp,24(sp)
 	.move $fp,sp
 
-	 sw a0, 40(sp) #Salvo el file descritptor en el arg building area del caller
+	 sw a0, 40(sp) #Salvo el file descriptor en el arg building area del caller
 
 	 #Si no funciona la opcion A
 	 #sw t0,16($fp)
@@ -50,7 +50,7 @@ end:
 
 	addu sp,sp,FRAME_SZ #Libero el stackFrame
 
-	jr ra
+	jr ra #para volver a la direccion original
 	.end read_c
 	.rdata #que va aca???????????
 	.align 2

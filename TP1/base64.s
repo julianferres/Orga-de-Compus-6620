@@ -25,6 +25,7 @@ encode:
 	sw a0, FRAME_SZ(sp) #Salvo el file descriptor de entrada en el arg building area del caller a0 -> fp
 	sw a1, (FRAME_SZ+4)(sp) #Salvo el file descriptor de salida en el arg building area del caller a1 -> wfp
 
+
 	#Preparar los registros temporales
 
 	li t0,0 #cargo un 0 en t0 para usarlo de contador
@@ -45,58 +46,70 @@ encode:
 	li t4,0 
 	sw t4,32($fp)
 
-	#Leo un caracter. ESTO ESTA MAL. Donde diga buffer hay que cambiar
-	la t9, read_c
-	jal t9
-	#mandar a ciclo dependiendo del valor del caracter, si sale del while mandar a finalizar_escritura
+	ba lectura
 
+lectura:
+	#Leo un caracter
+	la t9, read_c #en t9 está la subrutina read_c?
+	jal t9 #salta a subrutina read_c
 
-ciclo:
-	#Llamo a las correspondientes ramas
+	sw v0,36(sp) #guardo el resultado de la lectura en la pila
+	lw t5,36($fp) #en t5 está el carácter leído
+
+	#Salvo registros que pueden haberse perdido con llamado a subrutina
+	lw t0,16($fp)
+	lw t1,20($fp)
+	lw t2,24($fp)
+	lw t3,28($fp)
+	lw t4,32($fp)
+
+	ba ciclo 
+
+ciclo:	
+	beq t5, $zero, finalizar_escritura #llego a un EOF 
+
+	#Llamo a los correspondientes casos
 	beq t0, $zero, caso0
 	beq t0, t1, caso1
 	beq t0, t2, caso2
 
 caso0:
-	and t3, buffer, a1maske #a1 = buffer & a1mask; 
+	and t3, t5, a1maske #a1 = buffer & a1mask; 
 	srl t3, t3, 2 #a1 = a1 >> 2;
 
-	and t4, buffer, a2maske #a2 = buffer & a2mask;
+	and t4, t5, a2maske #a2 = buffer & a2mask;
 	sll t4, t4, 4 #	a2 = a2 << 4;
 
 	addi t0, t0, 1 #contador++. PUEDE FALLAR
 
 	#ESCRIBIR CARACTER NI IDEA. Pasar parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[a1]);
-	#LEER NI IDEA. Sobreescribir "buffer"
-	ba ciclo #continue
+	ba lectura
 
 caso1:
-	and t3, buffer, b1maske #b1 = buffer & b1mask;
+	and t3, t5, b1maske #b1 = buffer & b1mask;
 	srl t3, t3, 4 #b1 = b1 >> 4;
 	or t3, t3, t4 #b1 = b1 | a2; 
 
-	and t4, buffer, b2maske #b2 = buffer & b2mask;
+	and t4, t5, b2maske #b2 = buffer & b2mask;
 	sll t4, t4, 2 #b2 = b2 << 2;	
 
 	addi t0, t0, 1 #contador++. PUEDE FALLAR
 
 	#ESCRIBIR CARACTER NI IDEA. Pasar parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[b1]);
-	#LEER NI IDEA. Sobreescribir "buffer"
-	ba ciclo #continue
+	ba lectura
 
 caso2:
-	and t3, buffer, c1maske #c1 = buffer & c1mask;
+	and t3, t5, c1maske #c1 = buffer & c1mask;
 	srl t3, t3, 6 #c1 = c1 >> 6;
 	or t3, t3, t4 #c1 = c1 | b2;
 
-	and t4, buffer, c2maske #c2 = buffer & c2mask;
+	and t4, t5, c2maske #c2 = buffer & c2mask;
 
 	li t0, 0 #contador = 0;
 
 	#ESCRIBIR CARACTER NI IDEA. Pasar parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[c1]);
 	#ESCRIBIR CARACTER NI IDEA. Pasar parametros a1 y la tabla con indice t4 #write_caracter(wfp,B64[c2]);
-	#LEER NI IDEA. Sobreescribir "buffer"
-	ba ciclo #continue
+	ba lectura
 
 finalizar_escritura: 
 	beq t0, t1, casodobleigual #se que es malo el nombre 

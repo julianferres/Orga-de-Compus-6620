@@ -19,7 +19,7 @@ write_c:
 	sw $fp,24(sp)
 	.move $fp,sp
 
-	 sw a0, 40(sp) #Salvo el file descritptor en el arg building area del caller
+	 sw a0, 40(sp) #Salvo el file descriptor en el arg building area del caller
 	 sw a1, 44(sp) #Salvo el caracter a escribir en el 	arg building area del caller 
 
 	 lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb)
@@ -46,7 +46,7 @@ end:
 
 	addu sp,sp,FRAME_SZ #Libero el stackFrame
 
-	jr ra
+	jr ra #para volver a la direccion original
 	.end write_c
 	.rdata #que va aca???????????
 	.align 2
