@@ -25,7 +25,6 @@ encode:
 	sw a0, FRAME_SZ(sp) #Salvo el file descriptor de entrada en el arg building area del caller a0 -> fp
 	sw a1, (FRAME_SZ+4)(sp) #Salvo el file descriptor de salida en el arg building area del caller a1 -> wfp
 
-
 	#Preparar los registros temporales
 
 	li t0,0 #cargo un 0 en t0 para usarlo de contador
@@ -76,39 +75,64 @@ ciclo:
 caso0:
 	and t3, t5, a1maske #a1 = buffer & a1mask; 
 	srl t3, t3, 2 #a1 = a1 >> 2;
+	sw t3,28($fp) #actualizo valor de la pila
 
 	and t4, t5, a2maske #a2 = buffer & a2mask;
 	sll t4, t4, 4 #	a2 = a2 << 4;
+	sw t4,32($fp) #actualizo valor de la pila
 
 	addi t0, t0, 1 #contador++. PUEDE FALLAR
+	sw t0,16($fp) #actualizo valor de la pila
 
-	#ESCRIBIR CARACTER NI IDEA. Pasar parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[a1]);
-	ba lectura
+	ba escritura 
+	#Problema: no sé cómo pasar parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[a1]);
 
 caso1:
 	and t3, t5, b1maske #b1 = buffer & b1mask;
 	srl t3, t3, 4 #b1 = b1 >> 4;
 	or t3, t3, t4 #b1 = b1 | a2; 
+	sw t3,28($fp) #actualizo valor de la pila
 
 	and t4, t5, b2maske #b2 = buffer & b2mask;
 	sll t4, t4, 2 #b2 = b2 << 2;	
+	sw t4,32($fp)
 
 	addi t0, t0, 1 #contador++. PUEDE FALLAR
+	sw t0,16($fp) #actualizo valor de la pila
 
-	#ESCRIBIR CARACTER NI IDEA. Pasar parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[b1]);
-	ba lectura
+	ba escritura
+	#Problema: no sé cómo pasar parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[b1]);
 
 caso2:
 	and t3, t5, c1maske #c1 = buffer & c1mask;
 	srl t3, t3, 6 #c1 = c1 >> 6;
 	or t3, t3, t4 #c1 = c1 | b2;
+	sw t3,28($fp) #actualizo valor de la pila
 
 	and t4, t5, c2maske #c2 = buffer & c2mask;
+	sw t4,32($fp)
 
 	li t0, 0 #contador = 0;
+	sw t0,16($fp)
 
-	#ESCRIBIR CARACTER NI IDEA. Pasar parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[c1]);
-	#ESCRIBIR CARACTER NI IDEA. Pasar parametros a1 y la tabla con indice t4 #write_caracter(wfp,B64[c2]);
+	ba escritura
+	#Problema: no sé cómo pasar parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[c1]);
+	#Problema: no sé cómo pasar parametros a1 y la tabla con indice t4 #write_caracter(wfp,B64[c2]);
+
+escritura: 
+	la t9, write_c #en t9 está la subrutina write_c?
+	jal t9 #salta a subrutina write_c
+
+	sw v0,40(sp) #guardo el resultado de la escritura en la pila
+	lw t6,40($fp) #en t6 está el resultado de la escritura ?
+
+	#Salvo registros que pueden haberse perdido con llamado a subrutina
+	lw t0,16($fp)
+	lw t1,20($fp)
+	lw t2,24($fp)
+	lw t3,28($fp)
+	lw t4,32($fp)
+
 	ba lectura
 
 finalizar_escritura: 
@@ -179,53 +203,116 @@ decode:
 	#DUDOSO. Necesito cargar dos variables temporales para poder entrar a cada caso. 
 	#Los cargo inicialmente con 0 para ponerlos en la pila?
 
-	li t3,0 #a, c
+	li t3,5 #guardo numero distinto de 0
 	sw t3,28($fp) 
 
-	li t4,0 #b, d
+	li t4,5 #guardo numero distinto de 0
 	sw t4,32($fp)
 
 	li t5, 0 #completamente temporal
 	sw t5,36($fp)
 
-	#Leer un caracter, pasar a b64 y guardarlo en t3
-	la t9, read_c
-	jal t9
-	#mandar a ciclo dependiendo del valor del caracter, si sale del while mandar a end
+	ba lectura_inicial
+
+lectura_inicial: 
+	la t9, read_c #en t9 está la subrutina read_c?
+	jal t9 #salta a subrutina read_c
+
+	sw v0,28(sp) #guardo el resultado de la lectura en la pila
+	lw t3,28($fp) #en t3 está el carácter leído
+	#PASAR A B64 LO QUE ESTÁ EN T3
+
+	#Salvo registros que pueden haberse perdido con llamado a subrutina
+	lw t0,16($fp)
+	lw t1,20($fp)
+	lw t2,24($fp)
+	lw t3,28($fp)
+	lw t4,32($fp)
+	lw t5,36($fp)
+
+	ba ciclo 
 
 ciclo:
-	#Llamo a las correspondientes ramas
+	beq t3, $zero, end  
+	beq t4, $zero, end #en los dos registros se lee
+
+	#Llamo a los correspondientes casos
 	beq t0, $zero, caso0
 	beq t0, t1, caso1
 	beq t0, t2, caso2
 
 caso0:
 	#Leer un caracter, pasar a b64 y guardarlo en t4
+	la t9, read_c #en t9 está la subrutina read_c?
+	jal t9 #salta a subrutina read_c
+
+	sw v0,32(sp) #guardo el resultado de la lectura en la pila
+	lw t4,32($fp) #en t4 está el carácter leído
+	#PASAR A B64 LO QUE ESTÁ EN T4
+
+	#Salvo registros que pueden haberse perdido con llamado a subrutina
+	lw t0,16($fp)
+	lw t1,20($fp)
+	lw t2,24($fp)
+	lw t3,28($fp)
+	lw t4,32($fp)
+	lw t5,36($fp)
 
 	sll t3, t3, 2 #a = a << 2
 	and t5, t4, mask1d #b & mask1
 	srl t5, t5, 4 #(b & mask1) >> 4
 	or t3, t3, t5 #a = a | ((b & mask1) >> 4);
 
+	#escribir caracter con valor t3(a) en ascii
+
 	addi t0, t0, 1 #contador++
 	ba ciclo #continue
 
 caso1:
 	#Leer un caracter, si es = ir a end
-	#Pasar a b64 y guardarlo en t3
+	la t9, read_c #en t9 está la subrutina read_c?
+	jal t9 #salta a subrutina read_c
+
+	sw v0,28(sp) #guardo el resultado de la lectura en la pila
+	lw t3,28($fp) #en t3 está el carácter leído
+	#PASAR A B64 LO QUE ESTÁ EN T3
+	#Si es = ir a end
+
+	#Salvo registros que pueden haberse perdido con llamado a subrutina
+	lw t0,16($fp)
+	lw t1,20($fp)
+	lw t2,24($fp)
+	lw t3,28($fp)
+	lw t4,32($fp)
+	lw t5,36($fp)
 
 	sll t4, t4, 4 #b << 4
 	and t5, t3, mask2d #c & mask2
 	srl t5, t5, 2 #(c & mask2) >> 2
 	or t4, t4, t5 #b = b | ((c & mask2) >> 2);
 
+	#escribir caracter con valor t4(b) en ascii
 
 	addi t0, t0, 1 #contador++
 	ba ciclo #continue
 
 caso2:
 	#Leer un caracter, si es = ir a end
-	#Pasar a b64 y guardarlo en t4
+	la t9, read_c #en t9 está la subrutina read_c?
+	jal t9 #salta a subrutina read_c
+
+	sw v0,32(sp) #guardo el resultado de la lectura en la pila
+	lw t4,32($fp) #en t4 está el carácter leído
+	#PASAR A B64 LO QUE ESTÁ EN T4
+	#Si es = ir a end
+
+	#Salvo registros que pueden haberse perdido con llamado a subrutina
+	lw t0,16($fp)
+	lw t1,20($fp)
+	lw t2,24($fp)
+	lw t3,28($fp)
+	lw t4,32($fp)
+	lw t5,36($fp)	
 
 	sll t3, t3, 6 #c << 6	
 	and t5, t4, mask3d	#d & mask3
@@ -234,6 +321,20 @@ caso2:
 	#escribir caracter con valor t3(c) en ascii
 	
 	#leer un caracter, pasarlo a b64 y guardarlo en t3
+	la t9, read_c #en t9 está la subrutina read_c?
+	jal t9 #salta a subrutina read_c
+
+	sw v0,28(sp) #guardo el resultado de la lectura en la pila
+	lw t4,28($fp) #en t3 está el carácter leído
+	#PASAR A B64 LO QUE ESTÁ EN T3
+
+	#Salvo registros que pueden haberse perdido con llamado a subrutina
+	lw t0,16($fp)
+	lw t1,20($fp)
+	lw t2,24($fp)
+	lw t3,28($fp)
+	lw t4,32($fp)
+	lw t5,36($fp)
 
 	li t0, 0 #contador = 0
 	ba ciclo #continue
@@ -250,10 +351,7 @@ end:
 	.rdata #que va aca???????????
 	.align 2
 
-
 #define mask1d 0x30
 #define mask2d 0x3C
 #define mask3d 0x3F
 #define FRAME_SZ 
-
-
