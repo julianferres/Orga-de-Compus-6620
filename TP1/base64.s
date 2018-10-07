@@ -51,6 +51,7 @@ lectura:
 	#Leo un caracter
 	la t9, read_c #en t9 está la subrutina read_c?
 	jal t9 #salta a subrutina read_c
+	#Parametros necesarios para leer: en a0 fd y es así
 
 	sw v0,36(sp) #guardo el resultado de la lectura en la pila
 	lw t5,36(sp) #en t5 está el carácter leído
@@ -61,6 +62,8 @@ lectura:
 	lw t2,24(sp)
 	lw t3,28(sp)
 	lw t4,32(sp)
+	lw a0,FRAME_SZ(sp)
+	lw a1,(FRAME_SZ+4)(sp) 
 
 	ba ciclo 
 
@@ -85,7 +88,7 @@ caso0:
 	sw t0,16(sp) #actualizo valor de la pila
 
 	ba escritura 
-	#Problema: no sé cómo pasar parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[a1]);
+	#Se pasan parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[a1]);
 
 caso1:
 	and t3, t5, b1maske #b1 = buffer & b1mask;
@@ -95,13 +98,13 @@ caso1:
 
 	and t4, t5, b2maske #b2 = buffer & b2mask;
 	sll t4, t4, 2 #b2 = b2 << 2;	
-	sw t4,32(sp)
+	sw t4,32(sp) #actualizo valor de la pila
 
 	addi t0, t0, 1 #contador++. PUEDE FALLAR
 	sw t0,16(sp) #actualizo valor de la pila
 
 	ba escritura
-	#Problema: no sé cómo pasar parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[b1]);
+	#Se pasan parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[b1]);
 
 caso2:
 	and t3, t5, c1maske #c1 = buffer & c1mask;
@@ -110,16 +113,21 @@ caso2:
 	sw t3,28(sp) #actualizo valor de la pila
 
 	and t4, t5, c2maske #c2 = buffer & c2mask;
-	sw t4,32(sp)
+	sw t4,32(sp) #actualizo valor de la pila
 
 	li t0, 0 #contador = 0;
-	sw t0,16(sp)
+	sw t0,16(sp) #actualizo valor de la pila
 
 	ba escritura
-	#Problema: no sé cómo pasar parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[c1]);
-	#Problema: no sé cómo pasar parametros a1 y la tabla con indice t4 #write_caracter(wfp,B64[c2]);
+	#Se pasan parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[c1]);
+	#Falta pasar parametros a1 y la tabla con indice t4 #write_caracter(wfp,B64[c2]) -> al salir del ciclo
 
 escritura: 
+	#Parametros necesarios para escribir: en a0 wfd y no es así y en a1 t3
+
+	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
+	lw a1, 28(sp) #pongo en a1 el caracter a escribir que es t3
+
 	la t9, write_c #en t9 está la subrutina write_c?
 	jal t9 #salta a subrutina write_c
 
@@ -131,11 +139,34 @@ escritura:
 	lw t1,20(sp)
 	lw t2,24(sp)
 	lw t3,28(sp)
-	lw t4,32(sp)
+	lw t4,32(sp)	
+	lw a0,FRAME_SZ(sp)
+	lw a1,(FRAME_SZ+4)(sp) 
 
 	ba lectura
 
 finalizar_escritura: 
+	#Agrego caso faltante: pasar parametros a1 y la tabla con indice t4 #write_caracter(wfp,B64[c2])
+	#Parametros necesarios para escribir: en a0 wfd y no es así y en a1 t4
+
+	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
+	lw a1, 32(sp) #pongo en a1 el caracter a escribir que es t4
+
+	la t9, write_c #en t9 está la subrutina write_c?
+	jal t9 #salta a subrutina write_c
+
+	sw v0,40(sp) #guardo el resultado de la escritura en la pila
+	lw t6,40(sp) #en t6 está el resultado de la escritura ?
+
+	#Salvo registros que pueden haberse perdido con llamado a subrutina
+	lw t0,16(sp)
+	lw t1,20(sp)
+	lw t2,24(sp)
+	lw t3,28(sp)
+	lw t4,32(sp)	
+	lw a0,FRAME_SZ(sp)
+	lw a1,(FRAME_SZ+4)(sp) 
+
 	beq t0, t1, casodobleigual #se que es malo el nombre 
 	beq t0, t2, casoigual 
 	ba end
@@ -215,6 +246,8 @@ decode:
 	ba lectura_inicial
 
 lectura_inicial: 
+	#Parametro necesario para leer: en a0 el fd y es asi
+
 	la t9, read_c #en t9 está la subrutina read_c?
 	jal t9 #salta a subrutina read_c
 
@@ -228,7 +261,9 @@ lectura_inicial:
 	lw t2,24(sp)
 	lw t3,28(sp)
 	lw t4,32(sp)
-	lw t5,36(sp)
+	lw t5,36(sp)	
+	lw a0,FRAME_SZ(sp)
+	lw a1,(FRAME_SZ+4)(sp) 
 
 	ba ciclo 
 
@@ -243,6 +278,8 @@ ciclo:
 
 caso0:
 	#Leer un caracter, pasar a b64 y guardarlo en t4
+	#Parametro necesario para leer: en a0 el fd y es asi
+
 	la t9, read_c #en t9 está la subrutina read_c?
 	jal t9 #salta a subrutina read_c
 
@@ -256,20 +293,25 @@ caso0:
 	lw t2,24(sp)
 	lw t3,28(sp)
 	lw t4,32(sp)
-	lw t5,36(sp)
+	lw t5,36(sp)	
+	lw a0,FRAME_SZ(sp)
+	lw a1,(FRAME_SZ+4)(sp) 
 
 	sll t3, t3, 2 #a = a << 2
 	and t5, t4, mask1d #b & mask1
 	srl t5, t5, 4 #(b & mask1) >> 4
 	or t3, t3, t5 #a = a | ((b & mask1) >> 4);
 
-	#escribir caracter con valor t3(a) en ascii
-
 	addi t0, t0, 1 #contador++
-	ba ciclo #continue
+	sw t0,16(sp) #actualizo el valor de la pila
+
+	#Escribir caracter con valor t3(a) en ascii
+	ba escrituracaso0
 
 caso1:
 	#Leer un caracter, si es = ir a end
+	#Parametro necesario para leer: en a0 el fd y es asi
+
 	la t9, read_c #en t9 está la subrutina read_c?
 	jal t9 #salta a subrutina read_c
 
@@ -284,20 +326,26 @@ caso1:
 	lw t2,24(sp)
 	lw t3,28(sp)
 	lw t4,32(sp)
-	lw t5,36(sp)
+	lw t5,36(sp)	
+	lw a0,FRAME_SZ(sp)
+	lw a1,(FRAME_SZ+4)(sp) 
 
 	sll t4, t4, 4 #b << 4
 	and t5, t3, mask2d #c & mask2
 	srl t5, t5, 2 #(c & mask2) >> 2
 	or t4, t4, t5 #b = b | ((c & mask2) >> 2);
 
-	#escribir caracter con valor t4(b) en ascii
 
 	addi t0, t0, 1 #contador++
-	ba ciclo #continue
+	sw t0,16(sp) #actualizo el valor de la pila
+
+	#Escribir caracter con valor t4(b) en ascii
+	ba escrituracaso1
 
 caso2:
 	#Leer un caracter, si es = ir a end
+	#Parametro necesario para leer: en a0 el fd y es asi
+
 	la t9, read_c #en t9 está la subrutina read_c?
 	jal t9 #salta a subrutina read_c
 
@@ -313,31 +361,84 @@ caso2:
 	lw t3,28(sp)
 	lw t4,32(sp)
 	lw t5,36(sp)	
-
+	lw a0,FRAME_SZ(sp)
+	lw a1,(FRAME_SZ+4)(sp) 
+	
 	sll t3, t3, 6 #c << 6	
 	and t5, t4, mask3d	#d & mask3
 	or t3, t3, t5 #c = c | (d & mask3);
 
-	#escribir caracter con valor t3(c) en ascii
-	
-	#leer un caracter, pasarlo a b64 y guardarlo en t3
-	la t9, read_c #en t9 está la subrutina read_c?
-	jal t9 #salta a subrutina read_c
+	#Escribir caracter con valor t3(c) en ascii
+	ba escrituracaso2
 
-	sw v0,28(sp) #guardo el resultado de la lectura en la pila
-	lw t4,28(sp) #en t3 está el carácter leído
-	#PASAR A B64 LO QUE ESTÁ EN T3
+escrituracaso0:
+	#Parametros necesarios para escribir: en a0 wfd y no es así y en a1 t3
+
+	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
+	lw a1, 28(sp) #pongo en a1 el caracter a escribir que es t3
+
+	la t9, write_c #en t9 está la subrutina write_c?
+	jal t9 #salta a subrutina write_c
+
+	sw v0,40(sp) #guardo el resultado de la escritura en la pila
+	lw t6,40(sp) #en t6 está el resultado de la escritura ?
 
 	#Salvo registros que pueden haberse perdido con llamado a subrutina
 	lw t0,16(sp)
 	lw t1,20(sp)
 	lw t2,24(sp)
 	lw t3,28(sp)
-	lw t4,32(sp)
-	lw t5,36(sp)
+	lw t4,32(sp)	
+	lw a0,FRAME_SZ(sp)
+	lw a1,(FRAME_SZ+4)(sp) 
 
-	li t0, 0 #contador = 0
 	ba ciclo #continue
+
+escrituracaso1:
+	#Parametros necesarios para escribir: en a0 wfd y no es así y en a1 t4
+
+	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
+	lw a1, 32(sp) #pongo en a1 el caracter a escribir que es t4
+
+	la t9, write_c #en t9 está la subrutina write_c?
+	jal t9 #salta a subrutina write_c
+
+	sw v0,40(sp) #guardo el resultado de la escritura en la pila
+	lw t6,40(sp) #en t6 está el resultado de la escritura ?
+
+	#Salvo registros que pueden haberse perdido con llamado a subrutina
+	lw t0,16(sp)
+	lw t1,20(sp)
+	lw t2,24(sp)
+	lw t3,28(sp)
+	lw t4,32(sp)	
+	lw a0,FRAME_SZ(sp)
+	lw a1,(FRAME_SZ+4)(sp) 
+
+	ba ciclo #continue
+
+escrituracaso2:
+	#Parametros necesarios para escribir: en a0 wfd y no es así y en a1 t3
+
+	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
+	lw a1, 28(sp) #pongo en a1 el caracter a escribir que es t3
+
+	la t9, write_c #en t9 está la subrutina write_c?
+	jal t9 #salta a subrutina write_c
+
+	sw v0,40(sp) #guardo el resultado de la escritura en la pila
+	lw t6,40(sp) #en t6 está el resultado de la escritura ?
+
+	#Salvo registros que pueden haberse perdido con llamado a subrutina
+	lw t0,16(sp)
+	lw t1,20(sp)
+	lw t2,24(sp)
+	lw t3,28(sp)
+	lw t4,32(sp)	
+	lw a0,FRAME_SZ(sp)
+	lw a1,(FRAME_SZ+4)(sp) 
+
+	ba lectura_inicial
 
 end:
 	lw ra,(FRAME_SZ-8)(sp) 
