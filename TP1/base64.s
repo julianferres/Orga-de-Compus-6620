@@ -53,6 +53,8 @@ lectura:
 	jal t9 #salta a subrutina read_c
 	#Parametros necesarios para leer: en a0 fd y es así
 
+	beq b0 , 1 , readerr #Valido que no haya habido errores en read_c
+
 	sw v0,36(sp) #guardo el resultado de la lectura en la pila
 	lw t5,36(sp) #en t5 está el carácter leído
 
@@ -132,12 +134,14 @@ escritura:
 	la t9, write_c #en t9 está la subrutina write_c?
 	jal t9 #salta a subrutina write_c
 
+	beq b0 , 2 , writeerr #Valido que no haya habido errores en la escritura
+
 	beq t0,t2,volver_a_escribir
 
 	b lectura
 
 volver_a_escribir:
-	#Agrego caso faltante: pasar parametros a1 y la tabla con indice t4 #write_caracter(wfp,B64[c2])
+ 	#Agrego caso faltante: pasar parametros a1 y la tabla con indice t4 #write_caracter(wfp,B64[c2])
 	#Parametros necesarios para escribir: en a0 wfd y no es así y en a1 t4
 
 	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
@@ -145,6 +149,9 @@ volver_a_escribir:
 
 	la t9, write_c #en t9 está la subrutina write_c?
 	jal t9 #salta a subrutina write_c
+
+	beq b0 , 2 , writeerr #Valido que no haya habido errores en la escritura
+
 
 	b lectura
 
@@ -161,17 +168,25 @@ casodobleigual:
 	la t9, write_c #en t9 está la subrutina write_c?
 	jal t9 #salta a subrutina write_c
 
+	beq b0 , 2 , writeerr #Valido que no haya habido errores en la escritura
+
+
 	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
 	li a1, 00111101 #escribo el =
 
 	la t9, write_c #en t9 está la subrutina write_c?
 	jal t9 #salta a subrutina write_c
 
+	beq b0 , 2 , writeerr #Valido que no haya habido errores en la escritura
+
+
 	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
 	li a1, 00111101 #escribo el =
 
 	la t9, write_c #en t9 está la subrutina write_c?
-	jal t9 #salta a subrutina write_c	
+	jal t9 #salta a subrutina write_c
+
+	beq b0 , 2 , writeerr #Valido que no haya habido errores en la escritura
 
 	b end
 
@@ -183,11 +198,17 @@ casoigual:
 	la t9, write_c #en t9 está la subrutina write_c?
 	jal t9 #salta a subrutina write_c
 
+	beq b0 , 2 , writeerr #Valido que no haya habido errores en la escritura
+
 	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
 	li a1, 00111101 #escribo el =
 
+	beq b0 , 2 , writeerr #Valido que no haya habido errores en la escritura
+
 	la t9, write_c #en t9 está la subrutina write_c?
 	jal t9 #salta a subrutina write_c
+
+	beq b0 , 2 , writeerr #Valido que no haya habido errores en la escritura
 
 	b end
 
@@ -248,6 +269,8 @@ lectura_inicial:
 	la t9, read_c #en t9 está la subrutina read_c?
 	jal t9 #salta a subrutina read_c
 
+	beq b0, 1 , readerr #Valido que no haya habido errores en read_c
+
 	sw v0,28(sp) #guardo el resultado de la lectura en la pila en el espacio de t3
 	lw a0,28(sp) #en a0 está el carácter leído
 
@@ -285,6 +308,8 @@ caso0:
 	la t9, read_c #en t9 está la subrutina read_c?
 	jal t9 #salta a subrutina read_c
 
+	beq b0 , 1 , readerr #Valido que no haya habido errores en read_c
+
 	sw v0,32(sp) #guardo el resultado de la lectura en la pila en el espacio de t4
 	lw a0,32(sp) #en a0 está el carácter leído
 
@@ -320,6 +345,8 @@ caso1:
 
 	la t9, read_c #en t9 está la subrutina read_c?
 	jal t9 #salta a subrutina read_c
+
+	beq b0 , 1 , readerr #Valido que no haya habido errores en read_c
 
 	sw v0,28(sp) #guardo el resultado de la lectura en la pila en el espacio de t3
 	lw a0,28(sp) #en a0 está el carácter leído
@@ -361,6 +388,8 @@ caso2:
 	la t9, read_c #en t9 está la subrutina read_c?
 	jal t9 #salta a subrutina read_c
 
+	beq b0 , 1 , readerr #Valido que no haya habido errores en read_c
+
 	sw v0,32(sp) #guardo el resultado de la lectura en la pila en el espacio de t4
 	lw a0,32(sp) #en a0 está el carácter leído
 
@@ -400,6 +429,8 @@ escrituracaso0:
 	la t9, write_c 
 	jal t9 #salta a subrutina write_c
 
+	beq b0 , 2 , writeerr #Valido que no haya habido errores en la escritura
+
 	#Salvo registros que pueden haberse perdido con llamado a subrutina
 	lw t0,16(sp)
 	lw t1,20(sp)
@@ -419,6 +450,8 @@ escrituracaso1:
 
 	la t9, write_c #en t9 está la subrutina write_c?
 	jal t9 #salta a subrutina write_c
+
+	beq b0 , 2 , writeerr #Valido que no haya habido errores en la escritura
 
 	#Salvo registros que pueden haberse perdido con llamado a subrutina
 	lw t0,16(sp)
@@ -440,6 +473,8 @@ escrituracaso2:
 	la t9, write_c #en t9 está la subrutina write_c?
 	jal t9 #salta a subrutina write_c
 
+	beq b0 , 2 , writeerr #Valido que no haya habido errores en la escritura
+
 	#Salvo registros que pueden haberse perdido con llamado a subrutina
 	lw t0,16(sp)
 	lw t1,20(sp)
@@ -450,6 +485,16 @@ escrituracaso2:
 	lw a1,(FRAME_SZ+4)(sp) 
 
 	b lectura_inicial
+
+readerr:
+	
+	addu b0, 1, 0
+
+	b end
+
+writeerr:
+	
+	addu b0, 2, 0
 
 end:
 	lw ra,(FRAME_SZ-8)(sp) 
@@ -466,4 +511,9 @@ end:
 #define mask1d 0x30
 #define mask2d 0x3C
 #define mask3d 0x3F
-#define FRAME_SZ 
+#define FRAME_SZ
+
+errmsg: .word err_read, err_write
+succesfull: #Defino para despues no tener un desfasaje desde la funcion que vaya a imprimir el error en pantalla y su indice
+err_read: .ascii "La lectura del archivo no fue exitosa"
+err_write: .ascii "La escritura del archivo no fue exitosa"

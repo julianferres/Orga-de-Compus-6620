@@ -35,13 +35,11 @@ read_c:
 
 	 syscall #busca en v0 que funcion va a ejecutar y la ejecuta
 
+	 addu b0, 0, 0
+
 	 beq a3, 0, end #success
 
-	 li a0, 2 # cargo en a0 el FD de stderr
-	 lb a1, error # cargo en a1 el error a escribir
-	 li a2, 17 # Escribo solo un caracter(1byte)
-
-	 syscall
+	 addu b0, 1 , 0 #Si hay error, cargo el codigo de error en b0 como salida (utilizo 1 para errores de lectura)
 
 end:
 	lw ra,32(sp)
@@ -54,5 +52,3 @@ end:
 	.end read_c
 	.rdata #que va aca???????????
 	.align 2
-
-error: .asciiz "Error de lectura" #strlen = 17bytes

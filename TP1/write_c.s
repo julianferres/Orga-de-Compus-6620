@@ -30,14 +30,12 @@ write_c:
 
 	 syscall #busca en v0 que funcion va a ejecutar y la ejecuta
 
-	
+	 addu b0, 0 , 0	
+
 	 beq a3, 0, end #success
 
-	 li a0, 2 # cargo en a0 el FD de stderr
-	 lb a1, error # cargo en a1 el error a escribir
-	 li a2, 19 # Escribo solo un caracter(1byte)
-
-	 syscall
+	 addu b0, 2, 0 #Cargo en b0 el codigo de error para devolverle al caller, quien validara.
+ 
 
 end:
 	lw ra,32(sp)
@@ -50,5 +48,3 @@ end:
 	.end write_c
 	.rdata #que va aca???????????
 	.align 2
-
-error: .asciiz "Error de escritura" #strlen = 19bytes
