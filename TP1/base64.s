@@ -13,7 +13,7 @@ encode:
 
 .frame
 	.set norder
-	.upload(t9)
+	.cpload(t9)
 	.set reorder
 	subu sp,sp, FRAME_SZ
 	sw ra,(FRAME_SZ-8)(sp) #cambie aca por la constante porque me parece que va a tener que ser mas de 40
@@ -456,3 +456,69 @@ end:
 #define mask2d 0x3C
 #define mask3d 0x3F
 #define FRAME_SZ 
+
+tablab64: 
+	i1: .ascii 'A'
+	i2: .ascii 'B'
+	i3: .ascii 'C'
+	i4: .ascii 'D'
+	i5: .ascii 'E'
+	i6: .ascii 'F'
+	i7: .ascii 'G'
+	i8: .ascii 'H'
+	i9: .ascii 'I'
+	i10: .ascii 'J'
+	i11: .ascii 'K'
+	i12: .ascii 'K'
+	i13: .ascii 'L'
+	i14: .ascii 'M'
+	i15: .ascii 'N'
+	i16: .ascii 'O'
+	i17: .ascii 'P'
+	i18: .ascii 'Q'
+	i19: .ascii 'R'
+	i20: .ascii 'S'
+	i21: .ascii 'T'
+	i22: .ascii 'U'
+	i23: .ascii 'V' 
+	i24: .ascii 'W'
+	i25: .ascii 'X'
+	i26: .ascii 'Y'
+	i27: .ascii 'Z'
+	i28: .ascii 'a'
+	i29: .ascii 'b'
+	i30: .ascii 'c'
+	i31: .ascii 'd'
+	i32: .ascii 'e'
+	i33: .ascii 'f'
+	i34: .ascii 'g'
+	i35: .ascii 'h'
+	i36: .ascii 'i'
+	i37: .ascii 'j'
+	i38: .ascii 'k'
+	i39: .ascii 'l'
+	i40: .ascii 'm'
+	i41: .ascii 'o'
+	i42: .ascii 'p'
+	i43: .ascii 'q'
+	i44: .ascii 'r'
+	i45: .ascii 's'
+	i46: .ascii 't'
+	i47: .ascii 'u'
+	i48: .ascii 'v'
+	i49: .ascii 'w'
+	i50: .ascii 'x'
+	i51: .ascii 'y'
+	i52: .ascii 'z'
+	i53: .ascii '0'
+	i54: .ascii '1'
+	i55: .ascii '2'
+	i56: .ascii '3'
+	i57: .ascii '4'
+	i58: .ascii '5'
+	i59: .ascii '6'
+	i60: .ascii '7'
+	i61: .ascii '8'
+	i62: .ascii '9'
+	i63: .ascii '+' 
+	i64: .ascii '/'
