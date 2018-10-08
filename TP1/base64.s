@@ -36,20 +36,20 @@ encode:
 	li t2,2 #cargo un 2 en t2 para ir a caso2
 	sw t2,24(sp)
 
-	#DUDOSO. Necesito cargar dos variables temporales para poder entrar a cada caso. 
-	#Los cargo inicialmente con 0 para ponerlos en la pila?
-
 	li t3,0 
 	sw t3,28(sp) 
 
 	li t4,0 
 	sw t4,32(sp)
 
+	li t5,0
+	sw t5,36(sp)
+
 	b lectura
 
 lectura:
-	#Leo un caracter
-	la t9, read_c #en t9 está la subrutina read_c?
+	#Leo un caracter antes del while
+	la t9, read_c 
 	jal t9 #salta a subrutina read_c
 	#Parametros necesarios para leer: en a0 fd y es así
 
@@ -62,6 +62,7 @@ lectura:
 	lw t2,24(sp)
 	lw t3,28(sp)
 	lw t4,32(sp)
+	lw t5,36(sp)
 	lw a0,FRAME_SZ(sp)
 	lw a1,(FRAME_SZ+4)(sp) 
 
@@ -84,7 +85,7 @@ caso0:
 	sll t4, t4, 4 #	a2 = a2 << 4;
 	sw t4,32(sp) #actualizo valor de la pila
 
-	addi t0, t0, 1 #contador++. PUEDE FALLAR
+	addi t0, t0, 1 
 	sw t0,16(sp) #actualizo valor de la pila
 
 	b escritura 
@@ -100,7 +101,7 @@ caso1:
 	sll t4, t4, 2 #b2 = b2 << 2;	
 	sw t4,32(sp) #actualizo valor de la pila
 
-	addi t0, t0, 1 #contador++. PUEDE FALLAR
+	addi t0, t0, 1 #contador++
 	sw t0,16(sp) #actualizo valor de la pila
 
 	b escritura
@@ -120,7 +121,7 @@ caso2:
 
 	b escritura
 	#Se pasan parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[c1]);
-	#Falta pasar parametros a1 y la tabla con indice t4 #write_caracter(wfp,B64[c2]) -> al salir del ciclo
+	#Falta pasar parametros a1 y la tabla con indice t4 #write_caracter(wfp,B64[c2]) -> volver_a_escribir
 
 escritura: 
 	#Parametros necesarios para escribir: en a0 wfd y no es así y en a1 t3
@@ -131,21 +132,11 @@ escritura:
 	la t9, write_c #en t9 está la subrutina write_c?
 	jal t9 #salta a subrutina write_c
 
-	sw v0,40(sp) #guardo el resultado de la escritura en la pila
-	lw t6,40(sp) #en t6 está el resultado de la escritura ?
-
-	#Salvo registros que pueden haberse perdido con llamado a subrutina
-	lw t0,16(sp)
-	lw t1,20(sp)
-	lw t2,24(sp)
-	lw t3,28(sp)
-	lw t4,32(sp)	
-	lw a0,FRAME_SZ(sp)
-	lw a1,(FRAME_SZ+4)(sp) 
+	beq t0,t2,volver_a_escribir
 
 	b lectura
 
-finalizar_escritura: 
+volver_a_escribir:
 	#Agrego caso faltante: pasar parametros a1 y la tabla con indice t4 #write_caracter(wfp,B64[c2])
 	#Parametros necesarios para escribir: en a0 wfd y no es así y en a1 t4
 
@@ -155,30 +146,49 @@ finalizar_escritura:
 	la t9, write_c #en t9 está la subrutina write_c?
 	jal t9 #salta a subrutina write_c
 
-	sw v0,40(sp) #guardo el resultado de la escritura en la pila
-	lw t6,40(sp) #en t6 está el resultado de la escritura ?
+	b lectura
 
-	#Salvo registros que pueden haberse perdido con llamado a subrutina
-	lw t0,16(sp)
-	lw t1,20(sp)
-	lw t2,24(sp)
-	lw t3,28(sp)
-	lw t4,32(sp)	
-	lw a0,FRAME_SZ(sp)
-	lw a1,(FRAME_SZ+4)(sp) 
-
+finalizar_escritura: 
 	beq t0, t1, casodobleigual #se que es malo el nombre 
 	beq t0, t2, casoigual 
 	b end
 
 casodobleigual:
-	#escribir lo que esté en t3
-	#escribir doble igual
+
+	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
+	lw a1, 32(sp) #escribo t4
+
+	la t9, write_c #en t9 está la subrutina write_c?
+	jal t9 #salta a subrutina write_c
+
+	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
+	li a1, 00111101 #escribo el =
+
+	la t9, write_c #en t9 está la subrutina write_c?
+	jal t9 #salta a subrutina write_c
+
+	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
+	li a1, 00111101 #escribo el =
+
+	la t9, write_c #en t9 está la subrutina write_c?
+	jal t9 #salta a subrutina write_c	
+
 	b end
 
 casoigual:
-	#escribir lo que esté en t3
-	#escribir un igual
+
+	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
+	lw a1, 32(sp) #escribo t4
+
+	la t9, write_c #en t9 está la subrutina write_c?
+	jal t9 #salta a subrutina write_c
+
+	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
+	li a1, 00111101 #escribo el =
+
+	la t9, write_c #en t9 está la subrutina write_c?
+	jal t9 #salta a subrutina write_c
+	
 	b end
 
 end:
