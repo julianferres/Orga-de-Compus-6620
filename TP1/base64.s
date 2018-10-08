@@ -45,7 +45,7 @@ encode:
 	li t4,0 
 	sw t4,32(sp)
 
-	ba lectura
+	b lectura
 
 lectura:
 	#Leo un caracter
@@ -65,7 +65,7 @@ lectura:
 	lw a0,FRAME_SZ(sp)
 	lw a1,(FRAME_SZ+4)(sp) 
 
-	ba ciclo 
+	b ciclo 
 
 ciclo:	
 	beq t5, $zero, finalizar_escritura #llego a un EOF 
@@ -87,7 +87,7 @@ caso0:
 	addi t0, t0, 1 #contador++. PUEDE FALLAR
 	sw t0,16(sp) #actualizo valor de la pila
 
-	ba escritura 
+	b escritura 
 	#Se pasan parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[a1]);
 
 caso1:
@@ -103,7 +103,7 @@ caso1:
 	addi t0, t0, 1 #contador++. PUEDE FALLAR
 	sw t0,16(sp) #actualizo valor de la pila
 
-	ba escritura
+	b escritura
 	#Se pasan parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[b1]);
 
 caso2:
@@ -118,7 +118,7 @@ caso2:
 	li t0, 0 #contador = 0;
 	sw t0,16(sp) #actualizo valor de la pila
 
-	ba escritura
+	b escritura
 	#Se pasan parametros a1 y la tabla con indice t3 #write_caracter(wfp,B64[c1]);
 	#Falta pasar parametros a1 y la tabla con indice t4 #write_caracter(wfp,B64[c2]) -> al salir del ciclo
 
@@ -143,7 +143,7 @@ escritura:
 	lw a0,FRAME_SZ(sp)
 	lw a1,(FRAME_SZ+4)(sp) 
 
-	ba lectura
+	b lectura
 
 finalizar_escritura: 
 	#Agrego caso faltante: pasar parametros a1 y la tabla con indice t4 #write_caracter(wfp,B64[c2])
@@ -169,17 +169,17 @@ finalizar_escritura:
 
 	beq t0, t1, casodobleigual #se que es malo el nombre 
 	beq t0, t2, casoigual 
-	ba end
+	b end
 
 casodobleigual:
 	#escribir lo que esté en t3
 	#escribir doble igual
-	ba end
+	b end
 
 casoigual:
 	#escribir lo que esté en t3
 	#escribir un igual
-	ba end
+	b end
 
 end:
 	lw ra,(FRAME_SZ-8)(sp) 
@@ -243,7 +243,7 @@ decode:
 	li t5, 0 #completamente temporal
 	sw t5,36(sp)
 
-	ba lectura_inicial
+	b lectura_inicial
 
 lectura_inicial: 
 	#Parametro necesario para leer: en a0 el fd y es asi
@@ -251,9 +251,14 @@ lectura_inicial:
 	la t9, read_c #en t9 está la subrutina read_c?
 	jal t9 #salta a subrutina read_c
 
-	sw v0,28(sp) #guardo el resultado de la lectura en la pila
-	lw t3,28(sp) #en t3 está el carácter leído
-	#PASAR A B64 LO QUE ESTÁ EN T3
+	sw v0,28(sp) #guardo el resultado de la lectura en la pila en el espacio de t3
+	lw a0,28(sp) #en a0 está el carácter leído
+
+	la t9, getb64index
+	jal t9
+
+	sw v0,28(sp) #lo de v0 va al espacio de t3
+	lw t3,28(sp) #t3 -> caracter en indiceb64
 
 	#Salvo registros que pueden haberse perdido con llamado a subrutina
 	lw t0,16(sp)
@@ -265,7 +270,7 @@ lectura_inicial:
 	lw a0,FRAME_SZ(sp)
 	lw a1,(FRAME_SZ+4)(sp) 
 
-	ba ciclo 
+	b ciclo 
 
 ciclo:
 	beq t3, $zero, end  
@@ -283,9 +288,14 @@ caso0:
 	la t9, read_c #en t9 está la subrutina read_c?
 	jal t9 #salta a subrutina read_c
 
-	sw v0,32(sp) #guardo el resultado de la lectura en la pila
-	lw t4,32(sp) #en t4 está el carácter leído
-	#PASAR A B64 LO QUE ESTÁ EN T4
+	sw v0,32(sp) #guardo el resultado de la lectura en la pila en el espacio de t4
+	lw a0,32(sp) #en a0 está el carácter leído
+
+	la t9, getb64index
+	jal t9
+
+	sw v0,32(sp) #lo de v0 va al espacio de t4
+	lw t4,32(sp) #t4 -> caracter en indiceb64
 
 	#Salvo registros que pueden haberse perdido con llamado a subrutina
 	lw t0,16(sp)
@@ -306,7 +316,7 @@ caso0:
 	sw t0,16(sp) #actualizo el valor de la pila
 
 	#Escribir caracter con valor t3(a) en ascii
-	ba escrituracaso0
+	b escrituracaso0
 
 caso1:
 	#Leer un caracter, si es = ir a end
@@ -315,9 +325,15 @@ caso1:
 	la t9, read_c #en t9 está la subrutina read_c?
 	jal t9 #salta a subrutina read_c
 
-	sw v0,28(sp) #guardo el resultado de la lectura en la pila
-	lw t3,28(sp) #en t3 está el carácter leído
-	#PASAR A B64 LO QUE ESTÁ EN T3
+	sw v0,28(sp) #guardo el resultado de la lectura en la pila en el espacio de t3
+	lw a0,28(sp) #en a0 está el carácter leído
+
+	la t9, getb64index
+	jal t9
+
+	sw v0,28(sp) #lo de v0 va al espacio de t3
+	lw t3,28(sp) #t3 -> caracter en indiceb64
+
 	#Si es = ir a end
 
 	#Salvo registros que pueden haberse perdido con llamado a subrutina
@@ -340,7 +356,7 @@ caso1:
 	sw t0,16(sp) #actualizo el valor de la pila
 
 	#Escribir caracter con valor t4(b) en ascii
-	ba escrituracaso1
+	b escrituracaso1
 
 caso2:
 	#Leer un caracter, si es = ir a end
@@ -349,9 +365,15 @@ caso2:
 	la t9, read_c #en t9 está la subrutina read_c?
 	jal t9 #salta a subrutina read_c
 
-	sw v0,32(sp) #guardo el resultado de la lectura en la pila
-	lw t4,32(sp) #en t4 está el carácter leído
-	#PASAR A B64 LO QUE ESTÁ EN T4
+	sw v0,32(sp) #guardo el resultado de la lectura en la pila en el espacio de t4
+	lw a0,32(sp) #en a0 está el carácter leído
+
+	la t9, getb64index
+	jal t9
+
+	sw v0,32(sp) #lo de v0 va al espacio de t4
+	lw t4,32(sp) #t4 -> caracter en indiceb64
+
 	#Si es = ir a end
 
 	#Salvo registros que pueden haberse perdido con llamado a subrutina
@@ -369,7 +391,7 @@ caso2:
 	or t3, t3, t5 #c = c | (d & mask3);
 
 	#Escribir caracter con valor t3(c) en ascii
-	ba escrituracaso2
+	b escrituracaso2
 
 escrituracaso0:
 	#Parametros necesarios para escribir: en a0 wfd y no es así y en a1 t3
@@ -392,7 +414,7 @@ escrituracaso0:
 	lw a0,FRAME_SZ(sp)
 	lw a1,(FRAME_SZ+4)(sp) 
 
-	ba ciclo #continue
+	b ciclo #continue
 
 escrituracaso1:
 	#Parametros necesarios para escribir: en a0 wfd y no es así y en a1 t4
@@ -415,7 +437,7 @@ escrituracaso1:
 	lw a0,FRAME_SZ(sp)
 	lw a1,(FRAME_SZ+4)(sp) 
 
-	ba ciclo #continue
+	b ciclo #continue
 
 escrituracaso2:
 	#Parametros necesarios para escribir: en a0 wfd y no es así y en a1 t3
@@ -438,7 +460,7 @@ escrituracaso2:
 	lw a0,FRAME_SZ(sp)
 	lw a1,(FRAME_SZ+4)(sp) 
 
-	ba lectura_inicial
+	b lectura_inicial
 
 end:
 	lw ra,(FRAME_SZ-8)(sp) 
@@ -456,69 +478,3 @@ end:
 #define mask2d 0x3C
 #define mask3d 0x3F
 #define FRAME_SZ 
-
-tablab64: 
-	i1: .ascii 'A'
-	i2: .ascii 'B'
-	i3: .ascii 'C'
-	i4: .ascii 'D'
-	i5: .ascii 'E'
-	i6: .ascii 'F'
-	i7: .ascii 'G'
-	i8: .ascii 'H'
-	i9: .ascii 'I'
-	i10: .ascii 'J'
-	i11: .ascii 'K'
-	i12: .ascii 'K'
-	i13: .ascii 'L'
-	i14: .ascii 'M'
-	i15: .ascii 'N'
-	i16: .ascii 'O'
-	i17: .ascii 'P'
-	i18: .ascii 'Q'
-	i19: .ascii 'R'
-	i20: .ascii 'S'
-	i21: .ascii 'T'
-	i22: .ascii 'U'
-	i23: .ascii 'V' 
-	i24: .ascii 'W'
-	i25: .ascii 'X'
-	i26: .ascii 'Y'
-	i27: .ascii 'Z'
-	i28: .ascii 'a'
-	i29: .ascii 'b'
-	i30: .ascii 'c'
-	i31: .ascii 'd'
-	i32: .ascii 'e'
-	i33: .ascii 'f'
-	i34: .ascii 'g'
-	i35: .ascii 'h'
-	i36: .ascii 'i'
-	i37: .ascii 'j'
-	i38: .ascii 'k'
-	i39: .ascii 'l'
-	i40: .ascii 'm'
-	i41: .ascii 'o'
-	i42: .ascii 'p'
-	i43: .ascii 'q'
-	i44: .ascii 'r'
-	i45: .ascii 's'
-	i46: .ascii 't'
-	i47: .ascii 'u'
-	i48: .ascii 'v'
-	i49: .ascii 'w'
-	i50: .ascii 'x'
-	i51: .ascii 'y'
-	i52: .ascii 'z'
-	i53: .ascii '0'
-	i54: .ascii '1'
-	i55: .ascii '2'
-	i56: .ascii '3'
-	i57: .ascii '4'
-	i58: .ascii '5'
-	i59: .ascii '6'
-	i60: .ascii '7'
-	i61: .ascii '8'
-	i62: .ascii '9'
-	i63: .ascii '+' 
-	i64: .ascii '/'
