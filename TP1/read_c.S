@@ -24,14 +24,16 @@ read_c:
 	 sw a0, 40(sp) #Salvo el file descriptor en el arg building area del caller
 
 	 lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb)
+	 
 	 la a1, buffer  #opcion A
-	 li a2, 1 # Escribo solo un caracter(1byte)
+	 li a2, 1 # leo 3 bytes
 	 
 	 li v0, SYS_read #en v0 se almacena el syscall a ejecutar "sys_read" es una macro
 
 	 syscall #busca en v0 que funcion va a ejecutar y la ejecuta
 
-	 lw v0, buffer
+     la a1, buffer 
+	 lw v0, 0(a1) #cambiar
 
 	 addi v1, v1, 1
 
@@ -51,7 +53,6 @@ end:
 .end read_c
 
 .data  
-buffer: .space 1
-		.byte 0
-
 .align 2
+
+buffer: .space 4

@@ -68,7 +68,7 @@ lectura:
 	lw t4,32(sp)
 	lw t5,36(sp)
 	lw a0,FRAME_SZ(sp)
-	lw a1,(FRAME_SZ+4)(sp) 
+	lw v0,(FRAME_SZ+4)(sp) 
 
 	b ciclo_encode
 
