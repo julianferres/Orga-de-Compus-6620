@@ -23,7 +23,6 @@
 
 
 encode:
-
 	sub	sp,sp, FRAME_SZ
 	sw	$fp,(FRAME_SZ-16)(sp)
 	sw	gp,(FRAME_SZ-12)(sp)

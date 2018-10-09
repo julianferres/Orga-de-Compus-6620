@@ -3,8 +3,6 @@
 
 #define FRAME_SZ 40
 
-.data  
-buffer: .space 1
 .text
 .abicalls
 .align 2
@@ -17,11 +15,11 @@ buffer: .space 1
 .set		reorder
 
 read_c:
-	subu sp,sp, FRAME_SZ
-	sw ra,32(sp)
-	sw gp,28(sp)
-	sw $fp,24(sp)
-	move $fp,sp
+	 subu sp,sp, FRAME_SZ
+	 sw ra,32(sp)
+	 sw gp,28(sp)
+	 sw $fp,24(sp)
+	 move $fp,sp
 
 	 sw a0, 40(sp) #Salvo el file descriptor en el arg building area del caller
 
@@ -39,7 +37,7 @@ read_c:
 
 	 beq a3, 0, end #success
 
-	 addi v1, v1 , 1 #Si hay error, cargo el codigo de error en b0 como salida (utilizo 1 para errores de lectura)
+	 addi v1, v1 , 0 #Si hay error, cargo el codigo de error en b0 como salida (utilizo 1 para errores de lectura)
 
 end:
 	lw ra,32(sp)
@@ -51,3 +49,9 @@ end:
 	jr ra #para volver a la direccion original
 
 .end read_c
+
+.data  
+buffer: .space 1
+		.byte 0
+
+.align 2
