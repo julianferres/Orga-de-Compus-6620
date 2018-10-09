@@ -56,7 +56,7 @@ lectura_inicial:
 	sw v0,28(sp) #guardo el resultado de la lectura en la pila en el espacio de t3
 	lw a0,28(sp) #en a0 está el carácter leído
 
-	la t9, getb64index
+	la t9, geti64
 	jalr t9
 
 	sw v0,28(sp) #lo de v0 va al espacio de t3
@@ -91,7 +91,7 @@ caso0:
 	sw v0,32(sp) #guardo el resultado de la lectura en la pila en el espacio de t4
 	lw a0,32(sp) #en a0 está el carácter leído
 
-	la t9, getb64index
+	la t9, geti64
 	jalr t9
 
 	sw v0,32(sp) #lo de v0 va al espacio de t4
@@ -128,7 +128,7 @@ caso1:
 	li t5, 00111101 #cargo en t5 el igual
 	beq t5, a0, end
 
-	la t9, getb64index
+	la t9, geti64
 	jalr t9
 
 	sw v0,28(sp) #lo de v0 va al espacio de t3
@@ -166,7 +166,7 @@ caso2:
 	li t5, 00111101 #cargo en t5 el igual
 	beq t5, a0, end
 
-	la t9, getb64index
+	la t9, geti64
 	jalr t9
 
 	sw v0,32(sp) #lo de v0 va al espacio de t4

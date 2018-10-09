@@ -2,6 +2,7 @@
 #include<sys/syscall.h>
 
 #define FRAME_SZ 40
+
 .data  
 buffer: .space 1
 .text
@@ -23,12 +24,6 @@ read_c:
 	move $fp,sp
 
 	 sw a0, 40(sp) #Salvo el file descriptor en el arg building area del caller
-
-	 #Si no funciona la opcion A
-	 #sw t0,16($fp)
-	 #lw a1, t0
-	 #...
-	 #lw b0, 16($fp)
 
 	 lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb)
 	 lw a1, buffer  #opcion A
