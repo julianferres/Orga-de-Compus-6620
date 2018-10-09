@@ -1,4 +1,4 @@
-#include <mips/regdet.h>
+#include <mips/regdef.h>
 #include<sys/syscall.h>
 
 #define FRAME_SZ 40
@@ -15,15 +15,11 @@
 .set		reorder
 
 read_c:
-	.frame
-	.set norder
-	.upload(t9)
-	.set reorder
 	subu sp,sp, FRAME_SZ
 	sw ra,32(sp)
 	sw gp,28(sp)
 	sw $fp,24(sp)
-	.move $fp,sp
+	move $fp,sp
 
 	 sw a0, 40(sp) #Salvo el file descriptor en el arg building area del caller
 
@@ -37,15 +33,15 @@ read_c:
 	 lw a1, $b0  #opcion A
 	 li a2, 1 # Escribo solo un caracter(1byte)
 	 
-	 li v0, sys_read #en v0 se almacena el syscall a ejecutar "sys_read" es una macro
+	 li v0, SYS_read #en v0 se almacena el syscall a ejecutar "sys_read" es una macro
 
 	 syscall #busca en v0 que funcion va a ejecutar y la ejecuta
 
-	 addu b0, 0, 0
+	 addi v0, v0, 0
 
 	 beq a3, 0, end #success
 
-	 addu b0, 1 , 0 #Si hay error, cargo el codigo de error en b0 como salida (utilizo 1 para errores de lectura)
+	 addi v0, v0 , 1 #Si hay error, cargo el codigo de error en b0 como salida (utilizo 1 para errores de lectura)
 
 end:
 	lw ra,32(sp)
