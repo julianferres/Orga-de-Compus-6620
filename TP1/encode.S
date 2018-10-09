@@ -57,7 +57,7 @@ lectura:
 	la t9, read_c 
 	jalr t9 #salta a subrutina read_c
 
-	beq v0, t1, readerr #Valido que no haya habido errores en read_c
+	beq v1, t1, readerr #Valido que no haya habido errores en read_c
 
 	sw v0,36(sp) #guardo el resultado de la lectura en la pila
 	lw t5,36(sp) #en t5 está el carácter leído
@@ -130,7 +130,7 @@ escritura:
 	la t9, write_c #en t9 está la subrutina write_c?
 	jalr t9 #salta a subrutina write_c
 
-	beq t0, t2, writeerr #Valido que no haya habido errores en la escritura
+	beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
 
 	beq t0,t2,volver_a_escribir
 
@@ -143,7 +143,7 @@ volver_a_escribir:
 	la t9, write_c #en t9 está la subrutina write_c?
 	jalr t9 #salta a subrutina write_c
 
-	beq v0, t2, writeerr #Valido que no haya habido errores en la escritura
+	beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
 
 	b lectura
 
@@ -160,7 +160,7 @@ casodobleigual:
 	la t9, write_c #en t9 está la subrutina write_c?
 	jalr t9 #salta a subrutina write_c
 
-	beq v0, t2, writeerr #Valido que no haya habido errores en la escritura
+	beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
 
 	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
 	li a1, 00111101 #escribo el =
@@ -168,7 +168,7 @@ casodobleigual:
 	la t9, write_c #en t9 está la subrutina write_c?
 	jalr t9 #salta a subrutina write_c
 
-	beq v0, t2, writeerr #Valido que no haya habido errores en la escritura
+	beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
 
 	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
 	li a1, 00111101 #escribo el =
@@ -176,7 +176,7 @@ casodobleigual:
 	la t9, write_c #en t9 está la subrutina write_c?
 	jalr t9 #salta a subrutina write_c	
 
-	beq v0, t2, writeerr #Valido que no haya habido errores en la escritura
+	beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
 
 	b end_encode
 
@@ -188,7 +188,7 @@ casoigual:
 	la t9, write_c #en t9 está la subrutina write_c?
 	jalr t9 #salta a subrutina write_c
 
-	beq v0, t2, writeerr #Valido que no haya habido errores en la escritura
+	beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
 
 	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
 	li a1, 00111101 #escribo el =
@@ -196,7 +196,7 @@ casoigual:
 	la t9, write_c #en t9 está la subrutina write_c?
 	jalr t9 #salta a subrutina write_c
 
-	beq v0, t2, writeerr #Valido que no haya habido errores en la escritura
+	beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
 
 	b end_encode
 

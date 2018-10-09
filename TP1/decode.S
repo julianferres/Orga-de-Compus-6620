@@ -51,7 +51,7 @@ lectura_inicial:
 	la t9, read_c #en t9 está la subrutina read_c
 	jalr t9 #salta a subrutina read_c
 
-	beq v0, t1, readerr #Valido que no haya habido errores en la lectura
+	beq v1, t1, readerr #Valido que no haya habido errores en la lectura
 
 	sw v0,28(sp) #guardo el resultado de la lectura en la pila en el espacio de t3
 	lw a0,28(sp) #en a0 está el carácter leído
@@ -86,7 +86,7 @@ caso0:
 	jalr t9 #salta a subrutina read_c
 	nop
 
-	beq v0 , t1, readerr #Valido que no haya habido errores en la lectura
+	beq v1 , t1, readerr #Valido que no haya habido errores en la lectura
 
 	sw v0,32(sp) #guardo el resultado de la lectura en la pila en el espacio de t4
 	lw a0,32(sp) #en a0 está el carácter leído
@@ -120,7 +120,7 @@ caso1:
 	jalr t9 #salta a subrutina read_c
 	nop
 
-	beq v0 , t1, readerr #Valido que no haya habido errores en la lectura
+	beq v1 , t1, readerr #Valido que no haya habido errores en la lectura
 
 	sw v0,28(sp) #guardo el resultado de la lectura en la pila en el espacio de t3
 	lw a0,28(sp) #en a0 está el carácter leído
@@ -158,7 +158,7 @@ caso2:
 	jalr t9 #salta a subrutina read_c
 	nop
 
-	beq v0 , t1, readerr #Valido que no haya habido errores en la lectura
+	beq v1 , t1, readerr #Valido que no haya habido errores en la lectura
 
 	sw v0,32(sp) #guardo el resultado de la lectura en la pila en el espacio de t4
 	lw a0,32(sp) #en a0 está el carácter leído
@@ -197,7 +197,7 @@ escrituracaso0:
 	jalr t9 #salta a subrutina write_c
 	nop
 
-	beq v0 , t2 , writeerr #Valido que no haya habido errores en la escritura
+	beq v1 , t2 , writeerr #Valido que no haya habido errores en la escritura
 
 	lw t0,16(sp)
 	lw t1,20(sp)
@@ -218,7 +218,7 @@ escrituracaso1:
 	jalr t9 #salta a subrutina write_c
 	nop
 
-	beq v0 , t2 , writeerr #Valido que no haya habido errores en la escritura
+	beq v1 , t2 , writeerr #Valido que no haya habido errores en la escritura
 
 	lw t0,16(sp)
 	lw t1,20(sp)
@@ -239,7 +239,7 @@ escrituracaso2:
 	jalr t9 #salta a subrutina write_c
 	nop
 
-	beq v0 , t2 , writeerr #Valido que no haya habido errores en la escritura
+	beq v1 , t2 , writeerr #Valido que no haya habido errores en la escritura
 
 	lw t0,16(sp)
 	lw t1,20(sp)

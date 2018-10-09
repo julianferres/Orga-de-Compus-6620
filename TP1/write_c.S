@@ -33,11 +33,11 @@ write_c:
 
 	 syscall #busca en v0 que funcion va a ejecutar y la ejecuta
 
-	 addi v0, v0, 0	
+	 addi v1, v1, 0	
 
 	 beq a3, 0, end #success
 
-	 addi v0, v0, 2 #Cargo en v0 el codigo de error para devolverle al caller, quien validara.
+	 addi v1, v1, 2 #Cargo en v0 el codigo de error para devolverle al caller, quien validara.
  
 
 end:

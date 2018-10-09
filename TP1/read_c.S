@@ -2,7 +2,8 @@
 #include<sys/syscall.h>
 
 #define FRAME_SZ 40
-
+.data  
+buffer: .space 1
 .text
 .abicalls
 .align 2
@@ -30,18 +31,20 @@ read_c:
 	 #lw b0, 16($fp)
 
 	 lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb)
-	 lw a1, $b0  #opcion A
+	 lw a1, buffer  #opcion A
 	 li a2, 1 # Escribo solo un caracter(1byte)
 	 
 	 li v0, SYS_read #en v0 se almacena el syscall a ejecutar "sys_read" es una macro
 
 	 syscall #busca en v0 que funcion va a ejecutar y la ejecuta
 
-	 addi v0, v0, 0
+	 lb v0, buffer
+
+	 addi v1, v1, 0
 
 	 beq a3, 0, end #success
 
-	 addi v0, v0 , 1 #Si hay error, cargo el codigo de error en b0 como salida (utilizo 1 para errores de lectura)
+	 addi v1, v1 , 1 #Si hay error, cargo el codigo de error en b0 como salida (utilizo 1 para errores de lectura)
 
 end:
 	lw ra,32(sp)
