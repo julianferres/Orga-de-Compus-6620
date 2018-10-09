@@ -1,0 +1,10 @@
+*.o
+*.
+*.aux
+*.log
+*.out
+*.gz
+*.toc
+main
+input
+output

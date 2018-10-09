@@ -38,7 +38,7 @@ read_c:
 
 	 syscall #busca en v0 que funcion va a ejecutar y la ejecuta
 
-	 lb v0, buffer
+	 lw v0, buffer
 
 	 addi v1, v1, 0
 
