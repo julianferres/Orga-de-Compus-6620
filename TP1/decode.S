@@ -25,8 +25,6 @@ err_write: .ascii "La escritura del archivo no fue exitosa"
 .cpload		t9
 .set		reorder
 
-globl read_c, write_c
-
 decode:
 
 	subu sp,sp, FRAME_SZ
