@@ -78,9 +78,9 @@ int main (int argc, char const *argv[]) {
     			abort();
     	}
     }
-    close(fd);
-    close(wfd);
     if(isencode) encode(fd, wfd);
     else decode(fd, wfd);
+    close(fd);
+    close(wfd);    
     return 0;
 }
