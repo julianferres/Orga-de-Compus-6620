@@ -1,39 +1,56 @@
 #include <mips/regdef.h>
-#incllude <sys/syscall.h>
+#include <sys/syscall.h>
 
-	.section .mdebug.abi32
-	.previous
-	.abicalls
-	.text
-	.align	2
-	.globl	readc
-	.ent	readc
+#define FRAME_SZ 40
+
+.text
+.abicalls
+.align 2
+
+.globl		readc
+.ent		readc
+
+.set		noreorder
+.cpload		t9
+.set		reorder
+
 readc:
-	.frame	$fp,40,ra		# vars= 0, regs= 3/0, args= 16, extra= 8
-	.mask	0xd0000000,-8
-	.fmask	0x00000000,0
-	.set	noreorder
-	.cpload	t9
-	.set	reorder
-	subu	sp,sp,40
-	.cprestore 16
-	sw	ra,32(sp)
-	sw	$fp,28(sp)
-	sw	gp,24(sp)
-	move	$fp,sp
-	sw	a0,40($fp)
-	lw	a0,40($fp)
-	la	a1,buffer
-	li	a2,1			# 0x1
-	syscall
-	lb	v0,buffer
-	move	sp,$fp
-	lw	ra,32(sp)
-	lw	$fp,28(sp)
-	addu	sp,sp,40
-	j	ra
-	.end	readc
-	.size	readc, .-readc
+	 subu sp,sp, FRAME_SZ
+	 sw $fp,24(sp)
+	 .cprestore	 28
+	 sw ra,32(sp)
+	 move $fp,sp
 
-	.comm	buffer,4
-	.ident	"GCC: (GNU) 3.3.3 (NetBSD nb3 20040520)"
+	 sw a0, 40(sp) #Salvo el file descriptor en el arg building area del caller
+
+	 nop #lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb)
+	 
+	 la a1, buffer  #opcion A
+	 li a2, 1 # leo 1 byte
+	
+	 li v0, SYS_read #en v0 se almacena el syscall a ejecutar "sys_read"
+
+	 syscall #busca en v0 que funcion va a ejecutar y la ejecuta
+	 beq a3, 0, end #success
+error:
+	li a0, 1
+	li v0, SYS_exit
+	syscall
+
+end:
+	la t0, buffer
+	lb v0, 0(t0)
+	lw ra,32(sp)
+	lw gp,28(sp)
+	lw $fp,24(sp)
+
+	addu sp,sp,FRAME_SZ #Libero el stackFrame
+
+	jr ra #para volver a la direccion original
+
+.end readc
+
+.data  
+.align 2
+
+buffer: .space 4

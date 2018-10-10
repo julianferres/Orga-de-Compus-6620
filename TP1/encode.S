@@ -56,7 +56,7 @@ lectura:
 	la t9, read_c 
 	jalr t9 #salta a subrutina read_c
 
-	#beq v1, t1, readerr #Valido que no haya habido errores en read_c
+	nop # beq v1, t1, readerr #Valido que no haya habido errores en read_c
 
 	sb v0,36(sp) #guardo el resultado de la lectura en la pila
 	lb t5,36(sp) #en t5 está el carácter leído
@@ -224,7 +224,3 @@ end_encode:
 
 .data	
 .align 2
-errmsg: .word err_read, err_write
-succesfull: #Defino para despues no tener un desfasaje desde la funcion que vaya a imprimir el error en pantalla y su indice
-err_read: .ascii "La lectura del archivo no fue exitosa"
-err_write: .ascii "La escritura del archivo no fue exitosa"

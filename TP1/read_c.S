@@ -10,20 +10,21 @@
 .globl		read_c
 .ent		read_c
 
-
-read_c:
-	 subu sp,sp, FRAME_SZ
 .set		noreorder
 .cpload		t9
 .set		reorder
+
+read_c:
+	 sb zero ,buffer
+	 subu sp,sp, FRAME_SZ
 	 sw $fp,24(sp)
-.cprestore	 28
+	 .cprestore	 28
 	 sw ra,32(sp)
 	 move $fp,sp
 
 	 sw a0, 40(sp) #Salvo el file descriptor en el arg building area del caller
 
-	 #lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb)
+	 nop #lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb)
 	 
 	 la a1, buffer  #opcion A
 	 li a2, 1 # leo 1 byte
@@ -31,7 +32,10 @@ read_c:
 	 li v0, SYS_read #en v0 se almacena el syscall a ejecutar "sys_read"
 
 	 syscall #busca en v0 que funcion va a ejecutar y la ejecuta
-beq a3, 0, end #success
+	 li v0, 0
+	 beq a3, 0, end #success
+
+
 error:
 	li a0, 1
 	li v0, SYS_exit
@@ -53,4 +57,4 @@ end:
 .data  
 .align 2
 
-buffer: .space 4
+buffer: .space 1

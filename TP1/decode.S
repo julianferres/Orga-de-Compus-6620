@@ -8,12 +8,6 @@
 #define mask3d	0x3F
 
 .data	
-.align 2
-errmsg: .word err_read, err_write
-succesfull: #Defino para despues no tener un desfasaje desde la funcion que vaya a imprimir el error en pantalla y su indice
-err_read: .ascii "La lectura del archivo no fue exitosa"
-err_write: .ascii "La escritura del archivo no fue exitosa"
-
 .text
 .abicalls
 .align 2

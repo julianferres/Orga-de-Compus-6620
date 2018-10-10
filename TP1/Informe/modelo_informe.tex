@@ -4,17 +4,17 @@
 \usepackage[ansinew]{inputenc}
 \usepackage{hyperref}
 
-\title{	\textbf{Trabajo Práctico \#1:\\ Conjunto de instrucciones MIPS}}
+\title{ \Huge \textbf{Trabajo Práctico \#1:\\ \LARGE Conjunto de instrucciones MIPS}}
 
-\author{	Julian Ferres, \textit{Padrón Nro. 101483}                     \\
-            \texttt{julianferres@gmail.com}                                              \\[2.5ex]
-            Cecilia María Hortas, \textit{Padrón Nro. 100687}                     \\
-            \texttt{ceci.hortas@gmail.com}                                              \\[2.5ex]
-            Matías Ezequiel Scakosky, \textit{Padrón Nro. 99627}                     \\
-            \texttt{scakosky@hotmail.com}                                              \\[2.5ex]
-            \normalsize{2do. Cuatrimestre de 2018}                                      \\
-            \normalsize{66.20 Organización de Computadoras  $-$ Práctica Martes}  \\
-            \normalsize{Facultad de Ingeniería, Universidad de Buenos Aires}            \\
+\author{\LARGE Julian Ferres, \textit{Padrón Nro. 101483}                     \\
+         \LARGE    \texttt{julianferres@gmail.com}                                              \\[2.5ex]
+         \LARGE    Cecilia María Hortas, \textit{Padrón Nro. 100687}                     \\
+         \LARGE    \texttt{ceci.hortas@gmail.com}                                              \\[2.5ex]
+        \LARGE     Matías Ezequiel Scakosky, \textit{Padrón Nro. 99627}                     \\
+        \LARGE     \texttt{scakosky@hotmail.com}                                              \\[2.5ex]
+        \LARGE   2do. Cuatrimestre de 2018                                      \\        
+        \Large  66.20 Organización de Computadoras  $-$ Práctica Martes  \\        
+        \Large  Facultad de Ingeniería, Universidad de Buenos Aires            \\
        }
 \date{}
 
@@ -24,9 +24,13 @@
    % quita el número en la primer página
 \thispagestyle{empty}
 
+
 \begin{abstract}
-Se propone como objetivo del Trabajo Práctico realizar un programa que utilice código en C y en Assembly MIPS para codificar y decodificar información en base64. Se utiliza el programa GXemul para simular el entorno de desarrollo, una máquina MIPS que corre una versión de NetBSD.
+
+\large Se propone como objetivo del Trabajo Práctico realizar un programa que utilice código en C y en Assembly MIPS para codificar y decodificar información en base64. Se utiliza el programa GXemul para simular el entorno de desarrollo, una máquina MIPS que corre una versión de NetBSD.
 \end{abstract}
+
+
 \newpage
 \tableofcontents
 \newpage
@@ -89,7 +93,7 @@ En esta sección se detallan los pasos para compilar el programa en NetBSD a part
 	
 	\item Se transfieren los archivos a compilar a NetBSD con los siguientes comandos:
 	
-	\texttt{scp -P2222 -r TP0 root@127.0.0.1:/root/TP0NetBSD}
+	\texttt{scp -P2222 -r TP1 root@127.0.0.1:/root/TP0NetBSD}
 			 
 	\item Luego se ejecutan los siguientes comandos para realizar la compilación y extraer el código MIPS generado por el compilador en el sistema operativo que corre sobre GXemul:
 	
@@ -97,11 +101,11 @@ En esta sección se detallan los pasos para compilar el programa en NetBSD a part
 	
 	\texttt{root@:~\# pwd}
 	
-	\texttt{root@:~\# mkdir TP0NetBSD}
+	\texttt{root@:~\# mkdir TP1NetBSD}
 	
-	\texttt{root@:~\# cd TP0NetBSD}
+	\texttt{root@:~\# cd TP1NetBSD}
 	
-	\texttt{root@:~/TP0NetBSD/TP0\# gcc -Wall -O0 -S -mrnames *.c}
+	\texttt{root@:~/TP1NetBSD/TP1\# gcc -Wall -O0 -S -mrnames *.c}
 	
 	\begin{itemize}
 		\item \texttt{-s} para detener el compilador luego de generar el código assembly.
@@ -112,7 +116,7 @@ En esta sección se detallan los pasos para compilar el programa en NetBSD a part
 
 	\item Luego se transfiere el archivo .s para el sistema operativo sobre el cual corre GXemul:
 	
-	\texttt{hostOS\# scp -P2222 root@127.0.0.1:/root/TP0NetBSD/TP0/*.s /home/user}
+	\texttt{hostOS\# scp -P2222 root@127.0.0.1:/root/TP1NetBSD/TP1/*.s /home/user}
 \end{itemize}
 
 \section{Corridas de prueba}
@@ -168,20 +172,23 @@ En conclusión, se cumplió el objetivo del Trabajo Práctico ya que se desarrolló 
 
 \begin{thebibliography}{99}
 
-\bibitem{INT06} GXemul, http://gavare.se/gxemul/.
+\bibitem{}  GXemul, http://gavare.se/gxemul/.
 
-\bibitem{HEN00} J. L. Hennessy and D. A. Patterson, ``Computer Architecture. A Quantitative
+\bibitem{} J. L. Hennessy and D. A. Patterson, ``Computer Architecture. A Quantitative
 Approach,'' 3ra Edición, Morgan Kaufmann Publishers, 2000.
 
-\bibitem{LAR92} J. Larus and T. Ball, ``Rewriting Executable Files to Mesure Program Behavior,'' Tech. Report 1083, Univ. of Wisconsin, 1992.
+\bibitem{} J. Larus and T. Ball, ``Rewriting Executable Files to Mesure Program Behavior,'' Tech. Report 1083, Univ. of Wisconsin, 1992.
 
-\bibitem{LAR92} The NetBSD project, http://www.netbsd.org/.
+\bibitem{} The NetBSD project, http://www.netbsd.org/.
 
-\bibitem{LAR92} Base64 (Wikipedia), http://en.wikipedia.org/wiki/Base64
+\bibitem{} Base64 (Wikipedia), http://en.wikipedia.org/wiki/Base64
 
-\bibitem{LAR92} Base64 Enconde and Decode - Online, https://www.base64encode.org/
+\bibitem{} Base64 Enconde and Decode - Online, https://www.base64encode.org/
 
-\bibitem{LAR92} Getopt Long Option Example (The GNU C library), https://www.gnu.org/
+\bibitem{} Getopt Long Option Example (The GNU C library), https://www.gnu.org/
+
+\bibitem{} MIPS RISC Processor, http://www.sco.com/developers/devspecs/mipsabi.pdf
+
 
 \end{thebibliography}
 

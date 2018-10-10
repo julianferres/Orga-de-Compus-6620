@@ -11,7 +11,7 @@
 const char HELP[] = "Usage:\n tp0 -h \n tp0 -V \n tp0 [options] \n Options: \n -V, --version Print version and quit. \n -h, --help Print this information. \n -i, --input Location of the input file. \n -a, --action Program action: encode (default) or decode. \n";
 
 //Definición de la versión del programa
-const char VERSION[] = "2018.9.25 \n";
+const char VERSION[] = "2018.10.13 \n";
 
 //Defino tabla b64
 char B64[64]= {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 
@@ -65,7 +65,6 @@ int main (int argc, char const *argv[]) {
     			if(! fd) { fprintf(stderr, "File not found \n"); return 1; }
                 continue;
 
-
     		case 'o': 
                 if (! strcmp(optarg,"-")) continue;
                 FILE* wfp = fopen(optarg, "w");
@@ -78,8 +77,21 @@ int main (int argc, char const *argv[]) {
     			abort();
     	}
     }
-    if(isencode) encode(fd, wfd);
-    else decode(fd, wfd);
+
+    int output;
+
+    if(isencode){
+    	 output = encode(fd, wfd);
+    }
+
+    else{
+    	output = decode(fd, wfd);
+    }
+    
+    if (output){
+        fprintf(stderr, "%s", errmsg[output]);
+    }
+
     close(fd);
     close(wfd);    
     return 0;
