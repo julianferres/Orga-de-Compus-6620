@@ -1,0 +1,1258 @@
+ceci@ceci-Lenovo-ideapad-310-15ISK:~/Documentos/OrgadeCompus/gxemul-6620-20070927$ sudo ifconfig lo:0 172.20.0.1
+[sudo] password for ceci: 
+ceci@ceci-Lenovo-ideapad-310-15ISK:~/Documentos/OrgadeCompus/gxemul-6620-20070927$ ssh -p 2222 root@127.0.0.1
+Password:
+Last login: Wed Oct 10 22:19:13 2007
+NetBSD 3.0.1 (6620-dev) #2: Wed Sep 27 18:21:34 UTC 2006
+
+Welcome to NetBSD!
+
+tset: terminal type xterm-256color is unknown
+Terminal type? vt100 
+Terminal type is vt100.                                                 
+We recommend creating a non-root account and using su(1) for root access.
+root@:~# Ccd
+Display all 865 possibilities? (y or n)
+root@:~# cd tp1
+root@:~/tp1# scp -P22 ceci@/home/ceci/Documentos/OrgadeCompus/TP/TP1
+usage: scp [-1246BCpqrv] [-c cipher] [-F ssh_config] [-i identity_file]
+           [-l limit] [-o ssh_option] [-P port] [-S program]
+           [[user@]host1:]file1 [...] [[user@]host2:]file2
+root@:~/tp1# scp -P22 ceci@172.20.0.1/home/ceci/Documentos/OrgadeCompus/TP/TP1/* .
+cp: ceci@172.20.0.1/home/ceci/Documentos/OrgadeCompus/TP/TP1/*: No such file or directory
+root@:~/tp1# scp -P22 ceci@172.20.0.1:/home/ceci/Documentos/OrgadeCompus/TP/TP1/* .
+ceci@172.20.0.1's password: 
+base64.h                                      100%  130     0.1KB/s   00:00    
+decode.S                                      100% 5588     5.5KB/s   00:01    
+encode.S                                      100% 5100     5.0KB/s   00:01    
+getb64index.S                                 100% 1305     1.3KB/s   00:00    
+scp: /home/ceci/Documentos/OrgadeCompus/TP/TP1/Informe: not a regular file
+main.c                                        100% 2584     2.5KB/s   00:00    
+read_c.S                                      100% 1007     1.0KB/s   00:00    
+README.md                                     100%    4     0.0KB/s   00:00    
+write_c.S                                     100% 1037     1.0KB/s   00:00    
+root@:~/tp1# gcc -g -Wall main.c read_c.S write_c.S getb64index.S encode.S decode.S -o tp1
+root@:~/tp1# ls
+README.md           encode.S            netbsd_syscalls.txt tp1
+base64.S            encode.o            read_c.S            write_c.S
+base64.h            getb64index.S       read_c.o            write_c.o
+base64.txt          getb64index.o       scp.core
+decode.S            main.c              ssh.core
+decode.o            main.o              text
+root@:~/tp1# cat text
+root@:~/tp1# gcc -g -Wall main.c read_c.S write_c.S getb64index.S encode.S decode.S -o tp1
+root@:~/tp1# gdb ./tp1
+GNU gdb 5.3nb1
+Copyright 2002 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "mipsel--netbsd"...
+(gdb) b 81
+Breakpoint 1 at 0x401174: file main.c, line 81.
+(gdb) r -i text
+Starting program: /root/tp1/tp1 -i text
+
+Breakpoint 1, main (argc=3, argv=0x7fffdaec) at main.c:81
+81          if(isencode) encode(fd, wfd);
+(gdb) s
+encode () at encode.S:26
+26              sub     sp,sp, FRAME_SZ
+Current language:  auto; currently asm
+(gdb) 
+27              sw      $fp,(FRAME_SZ-16)(sp)
+(gdb) 
+28              sw      gp,(FRAME_SZ-12)(sp)
+(gdb) 
+29              sw      ra,(FRAME_SZ-8)(sp) 
+(gdb) 
+30              move    $fp,sp
+(gdb) 
+32              sw a0, FRAME_SZ(sp) #Salvo el file descriptor de entrada en el arg building area del caller a0 -> fp
+(gdb) 
+33              sw a1, (FRAME_SZ+4)(sp) #Salvo el file descriptor de salida en el arg building area del caller a1 -> wfp
+(gdb) 
+35              li t0,0 #cargo un 0 en t0 para usarlo de contador
+(gdb) 
+36              sw t0,16(sp) #guardo t0 en el area de la pila de las variables locales
+(gdb) 
+38              li t1,1 #cargo un 1 en t1 para ir a caso1
+(gdb) 
+39              sw t1,20(sp)
+(gdb) 
+41              li t2,2 #cargo un 2 en t2 para ir a caso2
+(gdb) 
+42              sw t2,24(sp)
+(gdb) 
+44              li t3,0 
+(gdb) 
+45              sw t3,28(sp) 
+(gdb) 
+47              li t4,0 
+(gdb) 
+48              sw t4,32(sp)
+(gdb) 
+50              li t5,0
+(gdb) 
+51              sw t5,36(sp)
+(gdb) 
+lectura () at encode.S:56
+56              la t9, read_c 
+(gdb) 
+57              jalr t9 #salta a subrutina read_c
+(gdb) 
+18               subu sp,sp, FRAME_SZ
+(gdb) 
+19               sw ra,32(sp)
+(gdb) 
+20               sw gp,28(sp)
+(gdb) 
+21               sw $fp,24(sp)
+(gdb) 
+22               move $fp,sp
+(gdb) 
+24               sw a0, 40(sp) #Salvo el file descriptor en el arg building area del caller
+(gdb) 
+26               lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb)
+(gdb) p a0
+No symbol "a0" in current context.
+(gdb) p $a0
+$1 = 5
+(gdb) p $a1
+$2 = 1
+(gdb) s
+28               la a1, buffer  #opcion A
+(gdb) 
+29               li a2, 1 # leo 3 bytes
+(gdb) 
+31               li v0, SYS_read #en v0 se almacena el syscall a ejecutar "sys_read" es una macro
+(gdb) 
+33               syscall #busca en v0 que funcion va a ejecutar y la ejecuta
+(gdb) 
+35           la a1, buffer 
+(gdb) p $a3
+$3 = 1
+(gdb) 
+$4 = 1
+(gdb) 
+$5 = 1
+(gdb) 
+$6 = 1
+(gdb) 
+$7 = 1
+(gdb) 
+$8 = 1
+(gdb) 
+$9 = 1
+(gdb) 
+$10 = 1
+(gdb) 
+$11 = 1
+(gdb) 
+$12 = 1
+(gdb) 
+$13 = 1
+(gdb) 
+$14 = 1
+(gdb) 
+$15 = 1
+(gdb) 
+$16 = 1
+(gdb) 
+$17 = 1
+(gdb) 
+$18 = 1
+(gdb) 
+$19 = 1
+(gdb) 
+$20 = 1
+(gdb) 
+$21 = 1
+(gdb) 
+$22 = 1
+(gdb) 
+$23 = 1
+(gdb) 
+$24 = 1
+(gdb) 
+$25 = 1
+(gdb) s
+36               lw v0, 0(a1) #cambiar
+(gdb) 
+38               addi v1, v1, 1
+(gdb) s
+42               addi v1, v1 , 0 #Si hay error, cargo el codigo de error en b0 como salida (utilizo 1 para errores de lectura)
+(gdb) p $v0
+$26 = 0
+(gdb) Quit
+(gdb) Quit
+(gdb) q
+The program is running.  Exit anyway? (y or n) y
+root@:~/tp1# gdb ./tp1
+GNU gdb 5.3nb1
+Copyright 2002 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "mipsel--netbsd"...
+(gdb) q
+root@:~/tp1# ls
+README.md           encode.S            netbsd_syscalls.txt tp1
+base64.S            encode.o            read_c.S            write_c.S
+base64.h            getb64index.S       read_c.o            write_c.o
+base64.txt          getb64index.o       scp.core
+decode.S            main.c              ssh.core
+decode.o            main.o              text
+root@:~/tp1# cat text  
+Manroot@:~/tp1# ls -la
+total 988
+drwxr-xr-x  2 root  wheel     512 Oct 10 22:38 .
+drwx------  4 root  wheel     512 Oct 10 02:14 ..
+-rw-r--r--  1 root  wheel       4 Oct 10 22:23 README.md
+-rw-r--r--  1 root  wheel   12962 Oct 10 04:39 base64.S
+-rw-r--r--  1 root  wheel     130 Oct 10 22:23 base64.h
+-rw-r--r--  1 root  wheel   12962 Oct 10 03:09 base64.txt
+-rw-r--r--  1 root  wheel    5588 Oct 10 22:23 decode.S
+-rw-r--r--  1 root  wheel    3424 Oct 10 20:14 decode.o
+-rw-r--r--  1 root  wheel    5100 Oct 10 22:23 encode.S
+-rw-r--r--  1 root  wheel    3256 Oct 10 20:14 encode.o
+-rw-r--r--  1 root  wheel    1305 Oct 10 22:23 getb64index.S
+-rw-r--r--  1 root  wheel    1944 Oct 10 20:14 getb64index.o
+-rw-r--r--  1 root  wheel    2584 Oct 10 22:23 main.c
+-rw-r--r--  1 root  wheel   12984 Oct 10 20:13 main.o
+-rw-r--r--  1 root  wheel   20136 Oct 10 20:10 netbsd_syscalls.txt
+-rw-r--r--  1 root  wheel    1007 Oct 10 22:23 read_c.S
+-rw-r--r--  1 root  wheel    2000 Oct 10 20:14 read_c.o
+-rw-------  1 root  wheel  339968 Oct 10 04:50 scp.core
+-rw-------  1 root  wheel  479232 Oct 10 04:50 ssh.core
+-rw-r--r--  1 root  wheel       3 Oct 10 17:41 text
+-rwxr-xr-x  1 root  wheel   80634 Oct 10 22:38 tp1
+-rw-r--r--  1 root  wheel    1037 Oct 10 22:23 write_c.S
+-rw-r--r--  1 root  wheel    1900 Oct 10 20:14 write_c.o
+root@:~/tp1# cat text
+Manroot@:~/tp1# ./tp1 -i text 
+root@:~/tp1# 4ls
+bash: 4ls: command not found
+root@:~/tp1# ./tp1 -i text 
+root@:~/tp1# 
+root@:~/tp1# 
+root@:~/tp1# 
+root@:~/tp1# 
+root@:~/tp1# ls
+README.md           encode.S            netbsd_syscalls.txt tp1
+base64.S            encode.o            read_c.S            write_c.S
+base64.h            getb64index.S       read_c.o            write_c.o
+base64.txt          getb64index.o       scp.core
+decode.S            main.c              ssh.core
+decode.o            main.o              text
+root@:~/tp1# gdb ./tp1 < text
+GNU gdb 5.3nb1
+Copyright 2002 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "mipsel--netbsd"...
+(gdb) Undefined command: "Man".  Try "help".
+(gdb) root@:~/tp1# quit
+bash: quit: command not found
+root@:~/tp1# gdb tp1 
+GNU gdb 5.3nb1
+Copyright 2002 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "mipsel--netbsd"...
+(gdb) q
+root@:~/tp1# gdb ./tp1 
+GNU gdb 5.3nb1
+Copyright 2002 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "mipsel--netbsd"...
+(gdb) b read_c
+Breakpoint 1 at 0x401234: file read_c.S, line 18.
+(gdb) r << text
+Starting program: /root/tp1/tp1 << text
+
+Breakpoint 1, read_c () at read_c.S:26
+26               lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb)
+Current language:  auto; currently asm
+(gdb) l
+21               sw $fp,24(sp)
+22               move $fp,sp
+23      
+24               sw a0, 40(sp) #Salvo el file descriptor en el arg building area del caller
+25      
+26               lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb)
+27               
+28               la a1, buffer  #opcion A
+29               li a2, 1 # leo 3 bytes
+30               
+(gdb) s
+28               la a1, buffer  #opcion A
+(gdb) p $a0
+$1 = 0
+(gdb) s
+29               li a2, 1 # leo 3 bytes
+(gdb) s
+31               li v0, SYS_read #en v0 se almacena el syscall a ejecutar "sys_read" es una macro
+(gdb) s
+33               syscall #busca en v0 que funcion va a ejecutar y la ejecuta
+(gdb) s
+35           la a1, buffer 
+(gdb) 
+36               lw v0, 0(a1) #cambiar
+(gdb) p $a3
+$2 = 0
+(gdb) s
+38               addi v1, v1, 1
+(gdb) p $v0
+$3 = 0
+(gdb) q
+The program is running.  Exit anyway? (y or n) y
+root@:~/tp1# scp -P22 ceci@172.20.0.1:/home/ceci/Documentos/OrgadeCompus/TP/TP1/* .
+ceci@172.20.0.1's password: 
+base64.h                                      100%  130     0.1KB/s   00:00    
+decode.S                                      100% 5588     5.5KB/s   00:01    
+encode.S                                      100% 5100     5.0KB/s   00:00    
+getb64index.S                                 100% 1305     1.3KB/s   00:00    
+scp: /home/ceci/Documentos/OrgadeCompus/TP/TP1/Informe: not a regular file
+main.c                                        100% 2588     2.5KB/s   00:00    
+read_c.S                                      100%  986     1.0KB/s   00:00    
+README.md                                     100%    4     0.0KB/s   00:00    
+write_c.S                                     100% 1037     1.0KB/s   00:00    
+root@:~/tp1# gcc -g -Wall main.c read_c.S write_c.S getb64index.S encode.S decode.S -o tp1
+root@:~/tp1# ./tp1
+Man
+
+
+^C
+root@:~/tp1# 
+root@:~/tp1# scp -P22 ceci@172.20.0.1:/home/ceci/Documentos/OrgadeCompus/TP/TP1///#define _POSIX_SOURCE
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <getopt.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include "base64.h"
+
+//Definición del menú de ayuda
+const char HELP[] = "Usage:\n tp0 -h \n tp0 -V \n tp0 [options] \n Options: \n -
+
+//Definición de la versión del programa
+const char VERSION[] = "2018.9.25 \n";
+
+//Defino tabla b64
+char B64[64]= {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
+'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+',
+
+int main (int argc, char const *argv[]) {
+
+        static struct option long_options[] = {
+            {"version",  no_argument, 0,  0 },
+            {"help",  no_argument, 0,  0 },
+            {"input",  optional_argument, 0,  0 },
+            {"output", optional_argument, 0,  0 },
+            {"action",  optional_argument, 0, 0},
+            {0,  0,   0,  0 }
+     };
+
+    int opt;
+    int fd = 0; //stdin
+    int wfd = 1; //stdout
+    char* const* buffer = (char* const*) argv;
+    int option_index = 0;
+    bool isencode = true;
+    while ((opt = getopt_long(argc, buffer, "Vha:i:o:", long_options, &option_in
+
+
+        switch (opt) {
+#include <stdio.h>
+
+size_t read_c(int fd, char* buf, size_t len);
+
+#include <stdio.h>
+
+size_t read_c(int fd, char* buf, size_t len);
+
+int main(void)
+{
+        char buf[2];
+        printf("read: %d bytes\n",read_c(0,buf,1));
+        buf[1] = 0;
+        printf("char read: %s\n", buf);
+        return 0;
+}
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+#include <stdio.h>
+
+size_t read_c(int fd, char* buf, size_t len);
+
+int main(void)
+{
+        char buf[2];
+        printf("read: %d bytes\n",read_c(0,buf,1));
+        buf[1] = 0;
+        printf("char read: %s\n", buf);
+        return 0;
+}
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+root@:~/tp1# ./x
+#include <stdio.h>
+
+size_t read_c(int fd, char* buf, size_t len);
+
+#include <mips/regdef.h>
+#include<sys/syscall.h>
+
+#define FRAME_SZ 40
+
+.text
+.abicalls
+.align 2
+
+.globl          read_c
+.ent            read_c
+
+
+read_c:
+         subu sp,sp, FRAME_SZ
+.set            noreorder
+.cpload         t9
+.set            reorder
+         sw $fp,24(sp)
+.cprestore       28
+         sw ra,32(sp)
+         move $fp,sp
+
+         sw a0, 40(sp) #Salvo el file descriptor en el arg building area del cal
+
+         #lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb
+
+         #la a1, buffer  #opcion A
+         #li a2, 1 # leo 1 byte
+
+         li v0, SYS_read #en v0 se almacena el syscall a ejecutar "sys_read"
+.ent            read_c
+#include <stdio.h>
+
+size_t read_c(int fd, char* buf, size_t len);
+
+int main(void)
+{
+        char buf[2];
+        printf("read: %d bytes\n",read_c(0,buf,1));
+        buf[1] = 0;
+        printf("char read: %s\n", buf);
+        return 0;
+}
+~
+~
+#include <mips/regdef.h>
+#include<sys/syscall.h>
+
+#define FRAME_SZ 40
+
+.text
+.abicalls
+.align 2
+
+.globl          read_c
+.ent            read_c
+
+
+read_c:
+         subu sp,sp, FRAME_SZ
+.set            noreorder
+.cpload         t9
+.set            reorder
+         sw $fp,24(sp)
+.cprestore       28
+         sw ra,32(sp)
+         move $fp,sp
+
+         sw a0, 40(sp) #Salvo el file descriptor en el arg building area del cal
+
+         #lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb
+#include <mips/regdef.h>
+#include <sys/syscall.h>
+
+#define FRAME_SZ 100
+
+#define a1maske 0xFC
+#define a2maske 0x03
+#define b1maske 0xF0
+#define b2maske 0x0F
+#define c1maske 0xC0
+#define c2maske 0X3F
+
+.text
+.abicalls
+.align 2
+
+.globl          encode
+.ent            encode
+
+.set            noreorder
+.cpload         t9
+.set            reorder
+
+
+encode:
+        sub     sp,sp, FRAME_SZ
+        sw      $fp,(FRAME_SZ-16)(sp)
+        sw      gp,(FRAME_SZ-12)(sp)
+        sw      ra,(FRAME_SZ-8)(sp)
+        move    $fp,sp
+
+        sw a0, FRAME_SZ(sp) #Salvo el file descriptor de entrada en el arg build
+        sw a1, (FRAME_SZ+4)(sp) #Salvo el file descriptor de salida en el arg bu
+
+        li t0,0 #cargo un 0 en t0 para usarlo de contador
+        sw t0,16(sp) #guardo t0 en el area de la pila de las variables locales
+
+        li t1,1 #cargo un 1 en t1 para ir a caso1
+        sw t1,20(sp)
+
+        li t2,2 #cargo un 2 en t2 para ir a caso2
+        sw t2,24(sp)
+
+        li t3,0
+        sw t3,28(sp)
+
+        li t4,0
+        sw t4,32(sp)
+
+        li t5,0
+        sw t5,36(sp)
+
+        b lectura
+
+lectura:
+        la t9, read_c
+        jalr t9 #salta a subrutina read_c
+
+        #beq v1, t1, readerr #Valido que no haya habido errores en read_c
+
+        sb v0,36(sp) #guardo el resultado de la lectura en la pila
+        lb t5,36(sp) #en t5 está el carácter leído
+        sw t4,32(sp)
+
+        li t5,0
+        sw t5,36(sp)
+
+        b lectura
+
+lectura:
+        la t9, read_c
+        jalr t9 #salta a subrutina read_c
+
+        #beq v1, t1, readerr #Valido que no haya habido errores en read_c
+
+        sb v0,36(sp) #guardo el resultado de la lectura en la pila
+        lb t5,36(sp) #en t5 está el carácter leído
+
+        lw t0,16(sp)
+        lw t1,20(sp)
+        lw t2,24(sp)
+        lw t3,28(sp)
+        lw t4,32(sp)
+        lw t5,36(sp)
+        lw a0,FRAME_SZ(sp)
+        lw v0,(FRAME_SZ+4)(sp)
+
+        b ciclo_encode
+
+ciclo_encode:
+        beq t5, zero, finalizar_escritura #llego a un EOF
+
+        beq t0, zero, caso0_encode
+        beq t0, t1, caso1_encode
+        beq t0, t2, caso2_encode
+
+caso0_encode:
+        and t3, t5, a1maske #a1 = buffer & a1mask;
+        srl t3, t3, 2 #a1 = a1 >> 2;
+        sw t3,28(sp) #actualizo valor de la pila
+
+        and t4, t5, a2maske #a2 = buffer & a2mask;
+        sll t4, t4, 4 # a2 = a2 << 4;
+        sw t4,32(sp) #actualizo valor de la pila
+
+        addi t0, t0, 1
+        sw t0,16(sp) #actualizo valor de la pila
+
+        b escritura
+
+caso1_encode:
+        and t3, t5, b1maske #b1 = buffer & b1mask;
+        srl t3, t3, 4 #b1 = b1 >> 4;
+        or t3, t3, t4 #b1 = b1 | a2;
+        sw t3,28(sp) #actualizo valor de la pila
+
+        and t4, t5, b2maske #b2 = buffer & b2mask;
+        sll t4, t4, 2 #b2 = b2 << 2;
+        sw t4,32(sp) #actualizo valor de la pila
+
+        addi t0, t0, 1 #contador++
+        sw t0,16(sp) #actualizo valor de la pila
+
+        b escritura
+
+caso2_encode:
+        and t3, t5, c1maske #c1 = buffer & c1mask;
+        srl t3, t3, 6 #c1 = c1 >> 6;
+        or t3, t3, t4 #c1 = c1 | b2;
+        sw t3,28(sp) #actualizo valor de la pila
+
+        and t4, t5, c2maske #c2 = buffer & c2mask;
+        sw t4,32(sp) #actualizo valor de la pila
+
+        li t0, 0 #contador = 0;
+        sw t0,16(sp) #actualizo valor de la pila
+
+        b escritura
+
+escritura:
+        lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
+        lw a1, 28(sp) #pongo en a1 el caracter a escribir que es t3
+
+        la t9, write_c #en t9 está la subrutina write_c?
+        jalr t9 #salta a subrutina write_c
+
+        beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
+
+        beq t0,t2,volver_a_escribir
+
+        b lectura
+
+volver_a_escribir:
+        lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
+        lw a1, 32(sp) #pongo en a1 el caracter a escribir que es t4
+
+        la t9, write_c #en t9 está la subrutina write_c?
+        jalr t9 #salta a subrutina write_c
+
+        beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
+
+        b lectura
+
+finalizar_escritura:
+        beq t0, t1, casodobleigual #se que es malo el nombre
+        beq t0, t2, casoigual
+        b end_encode
+
+casodobleigual:
+
+        lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
+        lw a1, 32(sp) #escribo t4
+
+        la t9, write_c #en t9 está la subrutina write_c?
+        jalr t9 #salta a subrutina write_c
+
+        beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
+
+        lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
+        li a1, 00111101 #escribo el =
+
+        la t9, write_c #en t9 está la subrutina write_c?
+        jalr t9 #salta a subrutina write_c
+
+        beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
+
+        lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
+        li a1, 00111101 #escribo el =
+
+        la t9, write_c #en t9 está la subrutina write_c?
+        jalr t9 #salta a subrutina write_c
+
+        beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
+
+        b end_encode
+
+casoigual:
+
+        lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
+        lw a1, 32(sp) #escribo t4
+
+        la t9, write_c #en t9 está la subrutina write_c?
+        jalr t9 #salta a subrutina write_c
+
+        beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
+
+        lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
+        li a1, 00111101 #escribo el =
+
+        la t9, write_c #en t9 está la subrutina write_c?
+        jalr t9 #salta a subrutina write_c
+
+        beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
+
+        b end_encode
+
+readerr:
+
+        li v0, 1
+
+        b end_encode
+
+writeerr:
+
+        li v0, 2
+
+        b end_encode
+
+end_encode:
+#include <stdio.h>
+
+char read_c(int fd);
+
+int main(void)
+{
+        printf("char read: %c\n", read_c(0));
+        return 0;
+}
+~
+~
+#include <stdio.h>
+
+char read_c(int fd);
+#include <mips/regdef.h>
+#include<sys/syscall.h>
+
+#define FRAME_SZ 40
+
+.text
+.abicalls
+.align 2
+
+.globl          read_c
+.ent            read_c
+
+
+read_c:
+         subu sp,sp, FRAME_SZ
+.set            noreorder
+.cpload         t9
+.set            reorder
+         sw $fp,24(sp)
+.cprestore       28
+         sw ra,32(sp)
+         move $fp,sp
+
+         sw a0, 40(sp) #Salvo el file descriptor en el arg building area del cal
+
+         #lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb
+
+         la a1, buffer  #opcion A
+         li a2, 1 # leo 1 byte
+
+         li v0, SYS_read #en v0 se almacena el syscall a ejecutar "sys_read"
+
+         syscall #busca en v0 que funcion va a ejecutar y la ejecuta
+#include <mips/regdef.h>
+#include <sys/syscall.h>
+
+#define FRAME_SZ 40
+
+.text
+.abicalls
+.align 2
+
+.globl          read_c
+.ent            read_c
+
+
+read_c:
+         subu sp,sp, FRAME_SZ
+.set            noreorder
+.cpload         t9
+.set            reorder
+         sw $fp,24(sp)
+.cprestore       28
+         sw ra,32(sp)
+.set            noreorder
+.cpload         t9
+.set            reorder
+         sw $fp,24(sp)
+.cprestore       28
+         sw ra,32(sp)
+         move $fp,sp
+
+         sw a0, 40(sp) #Salvo el file descriptor en el arg building area del cal
+
+         #lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb
+
+         la a1, buffer  #opcion A
+         li a2, 1 # leo 1 byte
+
+         li v0, SYS_read #en v0 se almacena el syscall a ejecutar "sys_read"
+
+         syscall #busca en v0 que funcion va a ejecutar y la ejecuta
+         sw a0, 40(sp) #Salvo el file descriptor en el arg building area del cal
+
+         #lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb
+
+         la a1, buffer  #opcion A
+         li a2, 1 # leo 1 byte
+
+         li v0, SYS_read #en v0 se almacena el syscall a ejecutar "sys_read"
+
+         syscall #busca en v0 que funcion va a ejecutar y la ejecuta
+read_c:
+         subu sp,sp, FRAME_SZ
+.set            noreorder
+.cpload         t9
+.set            reorder
+         sw $fp,24(sp)
+.cprestore       28
+         sw ra,32(sp)
+         move $fp,sp
+
+         sw a0, 40(sp) #Salvo el file descriptor en el arg building area del cal
+
+         #lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb
+
+         la a1, buffer  #opcion A
+         li a2, 1 # leo 1 byte
+
+         li v0, SYS_read #en v0 se almacena el syscall a ejecutar "sys_read"
+
+         syscall #busca en v0 que funcion va a ejecutar y la ejecuta
+.cpload         t9
+.set            reorder
+         sw $fp,24(sp)
+.cprestore       28
+         sw ra,32(sp)
+         move $fp,sp
+
+         sw a0, 40(sp) #Salvo el file descriptor en el arg building area del cal
+
+         #lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb
+
+         la a1, buffer  #opcion A
+         li a2, 1 # leo 1 byte
+
+         li v0, SYS_read #en v0 se almacena el syscall a ejecutar "sys_read"
+
+         syscall #busca en v0 que funcion va a ejecutar y la ejecuta
+beq a3, 0, end #success
+error:
+        li a0, 1
+        li v0, SYS_exit
+        syscall
+
+root@:~/tp1# echo -n "sd" | ./x
+root@:~/tp1# gdb ./x
+GNU gdb 5.3nb1
+Copyright 2002 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "mipsel--netbsd"...(no debugging symbols found)...
+(gdb) b main
+Breakpoint 1 at 0x400b54
+(gdb) r << text
+Starting program: /root/tp1/x << text
+(no debugging symbols found)...(no debugging symbols found)...
+Breakpoint 1, 0x00400b54 in main ()
+(gdb) s
+Single stepping until exit from function main, 
+which has no line number information.
+char read: �
+warning: Warning: GDB can't find the start of the function at 0x4006a0.
+
+    GDB is unable to find the start of the function at 0x4006a0
+and thus can't determine the size of that function's stack frame.
+This means that GDB may be unable to access that stack frame, or
+the frames below it.
+    This problem is most likely caused by an invalid program counter or
+stack pointer.
+    However, if you think GDB should simply search farther back
+from 0x4006a0 for code which looks like the beginning of a
+function, you can increase the range of the search using the `set
+heuristic-fence-post' command.
+0x00400810 in _start ()
+(gdb) s
+Single stepping until exit from function _start, 
+which has no line number information.
+
+Program exited normally.
+#include <stdio.h>
+
+char read_c(int fd);
+
+int main(void)
+{
+        printf("char read: %c\n", read_c(0));
+        return 0;
+}
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+root@:~/tp1# gcc -Wall -o x x.c read_c.S 
+root@:~/tp1# gdb ./x
+GNU gdb 5.3nb1
+Copyright 2002 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "mipsel--netbsd"...(no debugging symbols found)...
+(gdb) q
+root@:~/tp1# cat text
+Manroot@:~/tp1# gdb ./x
+GNU gdb 5.3nb1
+Copyright 2002 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "mipsel--netbsd"...(no debugging symbols found)...
+(gdb) b 4
+Can't find a default source file
+(gdb) file ./x
+Reading symbols from ./x...(no debugging symbols found)...done.
+(gdb) b 4
+Can't find a default source file
+(gdb) q
+root@:~/tp1# gcc -g -Wall -o x x.c read_c.S 
+root@:~/tp1# gdb ./x
+GNU gdb 5.3nb1
+Copyright 2002 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "mipsel--netbsd"...
+(gdb) b 4
+Breakpoint 1 at 0x400b30: file x.c, line 4.
+(gdb) q
+root@:~/tp1# gdb ./x
+GNU gdb 5.3nb1
+Copyright 2002 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "mipsel--netbsd"...
+(gdb) b4
+Undefined command: "b4".  Try "help".
+(gdb) b 4
+Breakpoint 1 at 0x400b30: file x.c, line 4.
+(gdb) r << text
+Starting program: /root/tp1/x << text
+
+Breakpoint 1, main () at x.c:6
+6       {
+(gdb) l
+1       #include <stdio.h>
+2       
+3       char read_c(int fd);
+4       
+5       int main(void)
+6       {
+7               printf("char read: %c\n", read_c(0));
+8               return 0;
+9       }
+(gdb) s
+7               printf("char read: %c\n", read_c(0));
+(gdb) 
+read_c () at read_c.S:15
+15               subu sp,sp, FRAME_SZ
+Current language:  auto; currently asm
+(gdb) 
+17      .cpload         t9
+(gdb) 
+19               sw $fp,24(sp)
+(gdb) 
+20      .cprestore       28
+(gdb) 
+21               sw ra,32(sp)
+(gdb) 
+22               move $fp,sp
+(gdb) 
+24               sw a0, 40(sp) #Salvo el file descriptor en el arg building area del caller
+(gdb) p $a0
+$1 = 0
+(gdb) s
+28               la a1, buffer  #opcion A
+(gdb) 
+29               li a2, 1 # leo 1 byte
+(gdb) p $a1
+$2 = 4194336
+(gdb) p buffer
+$3 = 0
+(gdb) help
+List of classes of commands:
+
+aliases -- Aliases of other commands
+breakpoints -- Making program stop at certain points
+data -- Examining data
+files -- Specifying and examining files
+internals -- Maintenance commands
+obscure -- Obscure features
+running -- Running the program
+stack -- Examining the stack
+status -- Status inquiries
+support -- Support facilities
+tracepoints -- Tracing of program execution without stopping the program
+user-defined -- User-defined commands
+
+Type "help" followed by a class name for a list of commands in that class.
+Type "help" followed by command name for full documentation.
+Command name abbreviations are allowed if unambiguous.
+(gdb) help p
+Print value of expression EXP.
+Variables accessible are those of the lexical environment of the selected
+stack frame, plus all those whose scope is global or an entire file.
+
+$NUM gets previous value number NUM.  $ and $$ are the last two values.
+$$NUM refers to NUM'th value back from the last one.
+Names starting with $ refer to registers (with the values they would have
+if the program were to return to the stack frame now selected, restoring
+all registers saved by frames farther in) or else to debugger
+"convenience" variables (any such name not a known register).
+Use assignment expressions to give values to convenience variables.
+
+{TYPE}ADREXP refers to a datum of data type TYPE, located at address ADREXP.
+@ is a binary operator for treating consecutive data objects
+anywhere in memory as an array.  FOO@NUM gives an array whose first
+element is FOO, whose second element is stored in the space following
+where FOO is stored, etc.  FOO must be an expression whose value
+resides in memory.
+
+EXP may be preceded with /FMT, where FMT is a format letter
+but no count or size letter (see "x" command).
+(gdb) p buffer
+$4 = 0
+(gdb) p $buffer
+$5 = void
+(gdb) p &buffer
+$6 = (<data variable, no debug info> *) 0x10000020
+(gdb) p $a1
+$7 = 4194336
+Man
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+root@:~/tp1# gdb ./x < text 
+
+char buffer[4];
+
+char readc(int fd)
+{
+#include <unistd.h>
+
+char buffer[4];
+
+char readc(int fd)
+{
+        read(fd,buffer,1);
+        return buffer[0];
+}
+
+
+~
+        .file   1 "r.c"
+        .section .mdebug.abi32
+        .previous
+        .abicalls
+        .text
+        .align  2
+        .globl  readc
+        .ent    readc
+readc:
+        .frame  $fp,40,$ra              # vars= 0, regs= 3/0, args= 16, extra= 8
+        .mask   0xd0000000,-8
+        .fmask  0x00000000,0
+        .set    noreorder
+        .cpload $t9
+        .set    reorder
+        .previous
+        .abicalls
+        .text
+        .align  2
+        .globl  readc
+        .ent    readc
+#include <stdio.h>
+
+char readc(int fd);
+
+int main(void)
+{
+        printf("char read: %c\n", readc(0));
+        return 0;
+}
+~
+~
+
+
+~
+#include <mips/regdef.h>
+#include <sys/syscall.h>
+
+        .section .mdebug.abi32
+        .previous
+        .abicalls
+        .text
+        .align  2
+        .globl  readc
+        .ent    readc
+readc:
+        .frame  $fp,40,$ra              # vars= 0, regs= 3/0, args= 16, extra= 8
+        .mask   0xd0000000,-8
+        .fmask  0x00000000,0
+        .set    noreorder
+        .cpload $t9
+        .set    reorder
+        subu    $sp,$sp,40
+        .cprestore 16
+        sw      $ra,32($sp)
+        sw      $fp,28($sp)
+        sw      $gp,24($sp)
+        move    $fp,$sp
+        sw      $a0,40($fp)
+        lw      $a0,40($fp)
+        la      $a1,buffer
+        li      $a2,1                   # 0x1
+        #la     $t9,read
+        #jal    $ra,$t9
+        li      v0,SYS_read
+        syscall
+        lb      $v0,buffer
+        move    $sp,$fp
+        lw      $ra,32($sp)
+        lw      $fp,28($sp)
+        addu    $sp,$sp,40
+        j       $ra
+        .end    readc
+root@:~/tp1# gcc -Wall -o x x.c r.c
+
+#include <mips/regdef.h>
+#incllude <sys/syscall.h>
+
+        .section .mdebug.abi32
+        .previous
+        .abicalls
+        .text
+        .align  2
+        .globl  readc
+        .ent    readc
+readc:
+        .frame  $fp,40,ra               # vars= 0, regs= 3/0, args= 16, extra= 8
+        .mask   0xd0000000,-8
+        .fmask  0x00000000,0
+        .set    noreorder
+        .cpload t9
+        .set    reorder
+        subu    sp,sp,40
+        .cprestore 16
+        sw      ra,32(sp)
+        sw      $fp,28(sp)
+        sw      gp,24(sp)
+        move    $fp,sp
+#include <mips/regdef.h>
+#incllude <sys/syscall.h>
+
+        .section .mdebug.abi32
+        .previous
+        .abicalls
+        .text
+        .align  2
+        .globl  readc
+        .ent    readc
+readc:
+        .frame  $fp,40,ra               # vars= 0, regs= 3/0, args= 16, extra= 8
+        .mask   0xd0000000,-8
+        .fmask  0x00000000,0
+        .set    noreorder
+        .cpload t9
+        .set    reorder
+        subu    sp,sp,40
+        .cprestore 16
+        sw      ra,32(sp)
+        sw      $fp,28(sp)
+        sw      gp,24(sp)
+        move    $fp,sp
+        sw      a0,40($fp)
+        lw      a0,40($fp)
+        la      a1,buffer
+        li      a2,1                    # 0x1
+        syscall
+        lb      v0,buffer
+        move    sp,$fp
+        lw      ra,32(sp)
+        lw      $fp,28(sp)
+        addu    sp,sp,40
+        j       ra
+        .end    readc
+        .size   readc, .-readc
+
+root@:~/tp1# gcc -Wall -o x x.c r.S
+root@:~/tp1# ./x
+Connection to 127.0.0.1 closed by remote host.
+Connection to 127.0.0.1 closed.
+ceci@ceci-Lenovo-ideapad-310-15ISK:~/Documentos/OrgadeCompus/gxemul-6620-20070927$ ssh -p 2222 root@127.0.0.1
+ssh: connect to host 127.0.0.1 port 2222: Connection refused
+ceci@ceci-Lenovo-ideapad-310-15ISK:~/Documentos/OrgadeCompus/gxemul-6620-20070927$ git commit -a -m "saque el archivo de netbsd_syscalls.txt"^C
+ceci@ceci-Lenovo-ideapad-310-15ISK:~/Documentos/OrgadeCompus/gxemul-6620-20070927$ 

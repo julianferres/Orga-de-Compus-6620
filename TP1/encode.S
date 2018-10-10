@@ -56,10 +56,10 @@ lectura:
 	la t9, read_c 
 	jalr t9 #salta a subrutina read_c
 
-	beq v1, t1, readerr #Valido que no haya habido errores en read_c
+	#beq v1, t1, readerr #Valido que no haya habido errores en read_c
 
-	sw v0,36(sp) #guardo el resultado de la lectura en la pila
-	lw t5,36(sp) #en t5 está el carácter leído
+	sb v0,36(sp) #guardo el resultado de la lectura en la pila
+	lb t5,36(sp) #en t5 está el carácter leído
 
 	lw t0,16(sp)
 	lw t1,20(sp)

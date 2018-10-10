@@ -61,7 +61,7 @@ int main (int argc, char const *argv[]) {
                 if (! strcmp(optarg,"-")) continue;
                 FILE* fp = fopen(optarg, "r");
     			fd = fileno(fp);
-                fclose(fp);
+                //fclose(fp);
     			if(! fd) { fprintf(stderr, "File not found \n"); return 1; }
                 continue;
 
@@ -70,7 +70,7 @@ int main (int argc, char const *argv[]) {
                 if (! strcmp(optarg,"-")) continue;
                 FILE* wfp = fopen(optarg, "w");
                 wfd = fileno(wfp);
-                fclose(wfp);
+                //fclose(wfp);
                 if(! wfd) { fprintf(stderr, "File not found \n"); return 1; }
     			break;
 
