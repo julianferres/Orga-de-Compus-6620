@@ -241,7 +241,7 @@ end_encode:
 
 	jr ra
 
-.end encode
+.end encode #vuelvo a pushear
 
 .data	
 .align 2
