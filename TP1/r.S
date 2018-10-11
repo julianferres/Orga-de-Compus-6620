@@ -40,7 +40,7 @@ error:
 
 end:
 	la t0, buffer
-	lb v0, 0(t0)
+	lb v0, 0(t0) #v0 puede ser 77, 97 o 110
 	lw ra,32(sp)
 	lw gp,28(sp)
 	lw $fp,24(sp)

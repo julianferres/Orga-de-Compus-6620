@@ -60,13 +60,13 @@ lectura:
 
 	sb v0,36(sp) #guardo el resultado de la lectura en la pila
 	lb t5,36(sp) #en t5 está el carácter leído, t5 puede valer 77, 97 o 110
+	sw t5,36(sp) #actualizo valor de la pila
 
 	lw t0,16(sp)
 	lw t1,20(sp)
 	lw t2,24(sp)
 	lw t3,28(sp)
 	lw t4,32(sp)
-	lw t5,36(sp)
 	lw a0,FRAME_SZ(sp)
 	lw v0,(FRAME_SZ+4)(sp) 
 
@@ -136,13 +136,12 @@ escritura:
 	la t9, write_c #en t9 está la subrutina write_c?
 	jalr t9 #salta a subrutina write_c
 
-
 	lw a0, (FRAME_SZ)(sp) #Salvo a0 que lo perdí cuando llamé al write
-	lw a1, (FRAME_SZ + 4)(sp)	#Salvo a1 que lo perdí cuando llamé al write
+	lw a1, (FRAME_SZ + 4)(sp)#Salvo a1 que lo perdí cuando llamé al write
 
 	beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
 
-	beq t0,t2,volver_a_escribir
+	beq t0,zero, volver_a_escribir
 
 	b lectura
 
