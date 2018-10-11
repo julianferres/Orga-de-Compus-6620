@@ -60,7 +60,7 @@ lectura:
 
 	sb v0,36(sp) #guardo el resultado de la lectura en la pila
 	lb t5,36(sp) #en t5 está el carácter leído, t5 puede valer 77, 97 o 110
-
+	
 	lw t0,16(sp)
 	lw t1,20(sp)
 	lw t2,24(sp)
