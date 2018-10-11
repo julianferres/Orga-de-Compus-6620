@@ -53,7 +53,7 @@ encode:
 	b lectura
 
 lectura:
-	la t9, read_c 
+	la t9, readc 
 	jalr t9 #salta a subrutina read_c
 
 	nop # beq v1, t1, readerr #Valido que no haya habido errores en read_c
@@ -124,7 +124,17 @@ caso2_encode:
 
 escritura: 
 	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
-	lw a1, 28(sp) #pongo en a1 el caracter a escribir que es t3
+
+	la t6, B64
+	addu a1, t3, t6 #pongo en a1 la direccion de memoria del dato a leer
+	nop#lb a1, 0(t6)
+
+	sw a1,28(sp) #actualizo valor de la pila
+
+	nop#lb a1,28(sp) #pongo en a1 el puntero al caracter a escribir que es t3
+
+
+	lb t7,0(a1) #para debuggearrr
 
 	la t9, write_c #en t9 está la subrutina write_c?
 	jalr t9 #salta a subrutina write_c

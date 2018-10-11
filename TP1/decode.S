@@ -42,7 +42,7 @@ lectura_inicial:
 	li t0,0 #cargo un 0 en t0 para usarlo de contador
 	sw t0,16(sp) #guardo t0 en el area de la pila de las variables locales
 
-	la t9, read_c #en t9 está la subrutina read_c
+	la t9, readc #en t9 está la subrutina read_c
 	jalr t9 #salta a subrutina read_c
 
 	beq v1, t1, readerr #Valido que no haya habido errores en la lectura
@@ -76,7 +76,7 @@ ciclo:
 	beq t0, t2, caso2
 
 caso0:
-	la t9, read_c #en t9 está la subrutina read_c?
+	la t9, readc #en t9 está la subrutina read_c?
 	jalr t9 #salta a subrutina read_c
 	nop
 
@@ -110,7 +110,7 @@ caso0:
 	b escrituracaso0
 
 caso1:
-	la t9, read_c #en t9 está la subrutina read_c?
+	la t9, readc #en t9 está la subrutina read_c?
 	jalr t9 #salta a subrutina read_c
 	nop
 
@@ -148,7 +148,7 @@ caso1:
 	b escrituracaso1
 
 caso2:
-	la t9, read_c #en t9 está la subrutina read_c?
+	la t9, readc #en t9 está la subrutina read_c?
 	jalr t9 #salta a subrutina read_c
 	nop
 

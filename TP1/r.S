@@ -23,7 +23,7 @@ readc:
 
 	 sw a0, 40(sp) #Salvo el file descriptor en el arg building area del caller
 
-	 nop #lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb)
+	 lw a0, 40(sp) # cargo en a0 el fileDescriptor(no sabemos si es lw o lb)
 	 
 	 la a1, buffer  #opcion A
 	 li a2, 1 # leo 1 byte
@@ -32,6 +32,8 @@ readc:
 
 	 syscall #busca en v0 que funcion va a ejecutar y la ejecuta
 	 beq a3, 0, end #success
+
+
 error:
 	li a0, 1
 	li v0, SYS_exit
