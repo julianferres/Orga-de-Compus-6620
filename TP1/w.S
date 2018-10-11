@@ -25,9 +25,7 @@ write_c:
 	 sw a0, 40(sp) #Salvo el file descriptor en el arg building area del caller
 	 sw a1, 44(sp) #Salvo el caracter a escribir en el 	arg building area del caller
 
-	 nop#la a1, 44(sp) # cargo en a1 la direccion del puntero
-
-	 lb t6,0(a1) #para debuggear -> caracter a escribir
+	 lb t6,0(a1) #para debuggear -> caracter a escribir. Puede ser 84, 87, 70 o 117
 
 	 li a2, 1 # Escribo solo un caracter(1byte)
 	 

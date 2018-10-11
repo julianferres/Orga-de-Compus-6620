@@ -33,7 +33,6 @@ readc:
 	 syscall #busca en v0 que funcion va a ejecutar y la ejecuta
 	 beq a3, 0, end #success
 
-
 error:
 	li a0, 1
 	li v0, SYS_exit

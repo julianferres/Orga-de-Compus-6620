@@ -59,7 +59,7 @@ lectura:
 	nop # beq v1, t1, readerr #Valido que no haya habido errores en read_c
 
 	sb v0,36(sp) #guardo el resultado de la lectura en la pila
-	lb t5,36(sp) #en t5 está el carácter leído
+	lb t5,36(sp) #en t5 está el carácter leído, t5 puede valer 77, 97 o 110
 
 	lw t0,16(sp)
 	lw t1,20(sp)
@@ -81,7 +81,7 @@ ciclo_encode:
 
 caso0_encode:
 	and t3, t5, a1maske #a1 = buffer & a1mask; 
-	srl t3, t3, 2 #a1 = a1 >> 2;
+	srl t3, t3, 2 #a1 = a1 >> 2; t3 tiene que valer 19, o 46
 	sw t3,28(sp) #actualizo valor de la pila
 
 	and t4, t5, a2maske #a2 = buffer & a2mask;
@@ -96,7 +96,7 @@ caso0_encode:
 caso1_encode:
 	and t3, t5, b1maske #b1 = buffer & b1mask;
 	srl t3, t3, 4 #b1 = b1 >> 4;
-	or t3, t3, t4 #b1 = b1 | a2; 
+	or t3, t3, t4 #b1 = b1 | a2; t3 tiene que valer 22
 	sw t3,28(sp) #actualizo valor de la pila
 
 	and t4, t5, b2maske #b2 = buffer & b2mask;
@@ -111,7 +111,7 @@ caso1_encode:
 caso2_encode:
 	and t3, t5, c1maske #c1 = buffer & c1mask;
 	srl t3, t3, 6 #c1 = c1 >> 6;
-	or t3, t3, t4 #c1 = c1 | b2;
+	or t3, t3, t4 #c1 = c1 | b2; t3 tiene que valer 5
 	sw t3,28(sp) #actualizo valor de la pila
 
 	and t4, t5, c2maske #c2 = buffer & c2mask;
@@ -125,16 +125,13 @@ caso2_encode:
 escritura: 
 	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
 
-	la t6, B64
+	la t6, B64 #Tengo que pasar el indice leido a base64
+
 	addu a1, t3, t6 #pongo en a1 la direccion de memoria del dato a leer
-	nop#lb a1, 0(t6)
 
 	sw a1,28(sp) #actualizo valor de la pila
 
-	nop#lb a1,28(sp) #pongo en a1 el puntero al caracter a escribir que es t3
-
-
-	lb t7,0(a1) #para debuggearrr
+	lb t7,0(a1) #para debuggear. Puede valer 84, 87, 110 o 117
 
 	la t9, write_c #en t9 está la subrutina write_c?
 	jalr t9 #salta a subrutina write_c
@@ -147,7 +144,7 @@ escritura:
 
 volver_a_escribir:
 	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
-	lw a1, 32(sp) #pongo en a1 el caracter a escribir que es t4
+	lw a1, 32(sp) #pongo en a1 el caracter a escribir que es t4; t4 tiene que valer 46
 
 	la t9, write_c #en t9 está la subrutina write_c?
 	jalr t9 #salta a subrutina write_c
