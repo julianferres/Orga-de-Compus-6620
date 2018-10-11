@@ -1,0 +1,21 @@
+\contentsline {section}{\numberline {1}Introducci\'on}{3}{section.1}
+\contentsline {section}{\numberline {2}Documentaci\'on relevante al dise\~no e implementaci\'on del programa}{3}{section.2}
+\contentsline {subsection}{\numberline {2.1}Dise\~no}{3}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Detalle de implementaci\'on}{4}{subsection.2.2}
+\contentsline {subsubsection}{\numberline {2.2.1}Subrutina encode}{4}{subsubsection.2.2.1}
+\contentsline {subsubsection}{\numberline {2.2.2}Subrutina decode}{4}{subsubsection.2.2.2}
+\contentsline {subsubsection}{\numberline {2.2.3}Subrutina write\_c}{4}{subsubsection.2.2.3}
+\contentsline {subsubsection}{\numberline {2.2.4}Subrutina read\_c}{4}{subsubsection.2.2.4}
+\contentsline {subsubsection}{\numberline {2.2.5}Subrutina geti64\_c}{4}{subsubsection.2.2.5}
+\contentsline {subsubsection}{\numberline {2.2.6}Funci\'on principal main}{4}{subsubsection.2.2.6}
+\contentsline {section}{\numberline {3}Comandos para compilar el programa}{4}{section.3}
+\contentsline {section}{\numberline {4}Corridas de prueba}{5}{section.4}
+\contentsline {section}{\numberline {5}C\'odigo fuente en C}{5}{section.5}
+\contentsline {subsection}{\numberline {5.1}main.c}{5}{subsection.5.1}
+\contentsline {section}{\numberline {6}C\'odigo implementado en MIPS32}{5}{section.6}
+\contentsline {subsection}{\numberline {6.1}code.s}{5}{subsection.6.1}
+\contentsline {subsection}{\numberline {6.2}decode.s}{5}{subsection.6.2}
+\contentsline {subsection}{\numberline {6.3}write\_c.s}{5}{subsection.6.3}
+\contentsline {subsection}{\numberline {6.4}read\_c.s}{5}{subsection.6.4}
+\contentsline {subsection}{\numberline {6.5}getb64index.s}{5}{subsection.6.5}
+\contentsline {section}{\numberline {7}Conclusiones}{6}{section.7}
