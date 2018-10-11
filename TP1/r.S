@@ -31,16 +31,21 @@ readc:
 	 li v0, SYS_read #en v0 se almacena el syscall a ejecutar "sys_read"
 
 	 syscall #busca en v0 que funcion va a ejecutar y la ejecuta
-	 beq a3, 0, end #success
+
+	 bne a3, 0, error #success
+	 bne v0, 0, lee_caracter
+	 b end
 
 error:
 	li a0, 1
 	li v0, SYS_exit
-	syscall
+	syscall	
 
-end:
+lee_caracter:
 	la t0, buffer
 	lb v0, 0(t0) #v0 puede ser 77, 97 o 110
+
+end:
 	lw ra,32(sp)
 	lw gp,28(sp)
 	lw $fp,24(sp)

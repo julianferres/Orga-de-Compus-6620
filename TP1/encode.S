@@ -131,18 +131,17 @@ escritura:
 
 	sw a1,28(sp) #actualizo valor de la pila
 
-	lb t7,0(a1) #para debuggear. Puede valer 84, 87, 110 o 117
+	lb t7,0(a1) #para debuggear. Puede valer 84, 87, 70 o 117
 
 	la t9, write_c #en t9 está la subrutina write_c?
 	jalr t9 #salta a subrutina write_c
-
 
 	lw a0, (FRAME_SZ)(sp) #Salvo a0 que lo perdí cuando llamé al write
 	lw a1, (FRAME_SZ + 4)(sp)	#Salvo a1 que lo perdí cuando llamé al write
 
 	beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
 
-	beq t0,t2,volver_a_escribir
+	beq t0, zero, volver_a_escribir
 
 	b lectura
 
@@ -154,9 +153,9 @@ volver_a_escribir:
 
 	addu a1, t4, t6 #pongo en a1 la direccion de memoria del dato a leer
 
-	sw a1,28(sp) #actualizo valor de la pila
+	sw a1,32(sp) #actualizo valor de la pila
 
-	lb t7,0(a1) #para debuggear. Puede valer 84, 87, 110 o 117
+	lb t7,0(a1) #para debuggear. Puede valer 84, 87, 70 o 117
 
 	la t9, write_c #en t9 está la subrutina write_c?
 	jalr t9 #salta a subrutina write_c
