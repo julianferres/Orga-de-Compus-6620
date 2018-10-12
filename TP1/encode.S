@@ -3,12 +3,12 @@
 
 #define FRAME_SZ 100
 
-#define a1maske	0xFC
-#define a2maske	0x03 		
-#define b1maske	0xF0
-#define b2maske	0x0F
-#define c1maske 0xC0
-#define c2maske 0X3F
+#define a1mask	0xFC
+#define a2mask	0x03 		
+#define b1mask	0xF0
+#define b2mask	0x0F
+#define c1mask 0xC0
+#define c2mask 0X3F
 
 .text
 .abicalls
@@ -21,7 +21,6 @@
 .cpload		t9
 .set		reorder
 
-
 encode:
 	sub	sp,sp, FRAME_SZ
 
@@ -33,210 +32,164 @@ encode:
 	sw a0, FRAME_SZ(sp) #Salvo el file descriptor de entrada en el arg building area del caller a0 -> fp
 	sw a1, (FRAME_SZ+4)(sp) #Salvo el file descriptor de salida en el arg building area del caller a1 -> wfp
 
-	li t0,0 #cargo un 0 en t0 para usarlo de contador
-	sw t0,16(sp) #guardo t0 en el area de la pila de las variables locales
 
-	li t1,1 #cargo un 1 en t1 para ir a caso1
-	sw t1,20(sp)
+lectura_1:
+	la t0, buffer_entrada #aca podríamos llenar de cero para verificar que quede todo en cero pero podría no ser necesario
+	li t1, 0 #inicializo contador en 0
 
-	li t2,2 #cargo un 2 en t2 para ir a caso2
-	sw t2,24(sp)
+	lw	a0, (FRAME_SZ)(sp) #a0 -> file descriptor
+	la	a1, buffer_entrada #a1 -> buffer de entrada
+	li	a2, 1 #a2 -> leer 1 byte
+	li	v0, SYS_read
+	syscall
 
-	li t3,0 
-	sw t3,28(sp) 
+	bne a3, 0, error #agregar = FALTA
 
-	li t4,0 
-	sw t4,32(sp)
+lectura_2:
+	addiu t1, t1, 1 #contador ++
 
-	li t5,0
-	sw t5,36(sp)
+	lw	a0, (FRAME_SZ)(sp) #a0 -> file descriptor
+ 	la	a1, buffer_entrada + 1 #a1 -> buffer de entrada + 1
+ 	li	a2, 1 #a2 -> leer 1 byte
+ 	li	v0, SYS_read 
+ 	syscall
 
-	b lectura
+ 	bne a3, 0, error #agregar = FALTA
 
-lectura:
-	la t9, readc 
-	jalr t9 #salta a subrutina read_c
+lectura_3:
+	addiu t1, t1, 1 #contador ++
 
-	nop # beq v1, t1, readerr #Valido que no haya habido errores en read_c
+	lw	a0, (FRAME_SZ)(sp) #a0 -> file descriptor
+ 	la	a1, buffer_entrada + 2 #a1 -> buffer de entrada + 1
+ 	li	a2, 1 #a2 -> leer 1 byte
+ 	li	v0, SYS_read 
+ 	syscall
 
-	sb v0,36(sp) #guardo el resultado de la lectura en la pila
-	lb t5,36(sp) #en t5 está el carácter leído, t5 puede valer 77, 97 o 110
-	sw t5,36(sp) #actualizo el valor en la pila del caracter leído
+ 	bne a3, 0, error #agregar = FALTA	
 
-	lw t0,16(sp) #se puede borrar de esta línea a la última del bloque
-	lw t1,20(sp)
-	lw t2,24(sp)
-	lw t3,28(sp)
-	lw t4,32(sp)
-	lw t5,36(sp)
-	lw a0,FRAME_SZ(sp)
+ciclo:
+	la t0, buffer_entrada
+	la t2, buffer_salida
 
-	b ciclo_encode
+	## Codificación primera lectura
 
-ciclo_encode:	
-	beq t5, zero, finalizar_escritura #llego a un EOF 
+	lbu	t3, 0(t0) 		# t3 = buffer_entrada[0] = buffer
 
-	beq t0, zero, caso0_encode
-	beq t0, t1, caso1_encode
-	beq t0, t2, caso2_encode
+	and t4, t3, a1mask # t4 = a1 = buffer & a1mask
+	srl t4, t4, 2     # t4 = a1 = a1 >> 2
 
-caso0_encode:
-	and t3, t5, a1maske #a1 = buffer & a1mask; 
-	srl t3, t3, 2 #a1 = a1 >> 2; t3 tiene que valer 19, o 46
-	sw t3,28(sp) #actualizo valor de la pila
+	and t5, t3, a2mask # t5 = a2 = buffer & a2mask
+	sll t5, t5, 4 # t5 = a2 = a2 <<< 4
 
-	and t4, t5, a2maske #a2 = buffer & a2mask;
-	sll t4, t4, 4 #	a2 = a2 << 4;
-	sw t4,32(sp) #actualizo valor de la pila
+	sb t4, 0(t2)	# buffer_salida[0] = a1
 
-	addi t0, t0, 1 
-	sw t0,16(sp) #actualizo valor de la pila
+	## Codificación segunda lectura
 
-	b escritura 
+	lbu	t3, 1(t0) 	# t3 = buffer_entrada[1] = buffer
 
-caso1_encode:
-	and t3, t5, b1maske #b1 = buffer & b1mask;
-	srl t3, t3, 4 #b1 = b1 >> 4;
-	or t3, t3, t4 #b1 = b1 | a2; t3 tiene que valer 22
-	sw t3,28(sp) #actualizo valor de la pila
+	and t4, t3, b1mask # t4 = b1 = buffer & b1mask
+	srl t4, t4, 4     # t4 = b1 = b1 >> 4
+	or t4, t4, t5 # t4 = b1 = b1 | a2
 
-	and t4, t5, b2maske #b2 = buffer & b2mask;
-	sll t4, t4, 2 #b2 = b2 << 2;	
-	sw t4,32(sp) #actualizo valor de la pila
+	and t5, t3, b2mask # t5 = b2 = buffer & b2mask
+	sll t5, t5, 2 # t5 = b2 = b2 <<< 2
 
-	addi t0, t0, 1 #contador++
-	sw t0,16(sp) #actualizo valor de la pila
+	sb t4, 1(t2)	# buffer_salida[1] = b1
 
-	b escritura
+	## Codificación tercera lectura
 
-caso2_encode:
-	and t3, t5, c1maske #c1 = buffer & c1mask;
-	srl t3, t3, 6 #c1 = c1 >> 6;
-	or t3, t3, t4 #c1 = c1 | b2; t3 tiene que valer 5
-	sw t3,28(sp) #actualizo valor de la pila
+	lbu	t3, 2(t0) 	# t3 = buffer_entrada[2] = buffer
 
-	and t4, t5, c2maske #c2 = buffer & c2mask;
-	sw t4,32(sp) #actualizo valor de la pila
+	and t4, t3, c1mask # t4 = c1 = buffer & c1mask
+	srl t4, t4, 6     # t4 = c1 = c1 >> 6
+	or t4, t4, t5 # t4 = c1 = c1 | b2
 
-	li t0, 0 #contador = 0;
-	sw t0,16(sp) #actualizo valor de la pila
+	and t5, t3, c2mask # t5 = c2 = buffer & c2mask
 
-	b escritura
+	sb t4, 2(t2)	# buffer_salida[2] = c1
+	sb t5, 3(t2)    # buffer_salida[3] = c2
 
-escritura: 
-	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
 
-	la a1, buffer #a1 -> direccion del buffer
-	la t6, B64 #t6 -> direccion de la tabla
-	addu t6, t3, t6 #t6 -> direccion del elemento a escribir
-	lb s1,(t6)    #s1 = byte base64
-	sb s1,0(a1)   #cargo el byte en buffer+0
+encode_to_b64:
 
-	nop#sw a1,28(sp) #actualizo valor de la pila. SACADO EN VERSION NUEVA. PUEDE FALLAR
+	la	t0, B64	# t0 = direccion de la tabla
+	la	t1, buffer_salida	# t1 = direccion del buffer
 
-	lb t7,0(a1) #para debuggear. Puede valer 84, 87, 70 o 117
+	lbu	t2, 0(t1)		# t2 = buffer_salida[0]
+	addu t0, t0, t2		
+	lb	t0, 0(t0)		# t0 = B64[t2]
+	sb	t0, 0(t1)		# buffer_salida[0] = t0
 
-	la t9, write_c #en t9 está la subrutina write_c?
-	jalr t9 #salta a subrutina write_c
+	la	t0, B64	# t0 = encode_table
+	la	t1, buffer_salida	# t1 = direccion del buffer
 
-	sw zero, buffer      #limpio el buffer
-	lw a0, (FRAME_SZ)(sp) #Salvo a0 que lo perdí cuando llamé al write
-	lw a1, (FRAME_SZ + 4)(sp)#Salvo a1 que lo perdí cuando llamé al write
+	lbu	t2, 1(t1)		# t2 = buffer_salida[1]
+	addu t0, t0, t2		
+	lb	t0, 0(t0)		# t0 = B64[t2]
+	sb	t0, 1(t1)		# buffer_salida[1] = t0
 
-	beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
+	la	t0, B64	# t0 = encode_table
+	la	t1, buffer_salida	# t1 = direccion del buffer
 
-	beq t0, zero, volver_a_escribir
+	lbu	t2, 2(t1)		# t2 = buffer_salida[2]
+	addu	t0, t0, t2		
+	lb	t0, 0(t0)		# t0 = B64[t2]
+	sb	t0, 2(t1)		# buffer_salida[2] = t0
 
-	b lectura
+	la	t0, B64	# t0 = encode_table
+	la	t1, buffer_salida	# t1 = direccion del buffer
 
-volver_a_escribir:
+	lbu	t2, 3(t1)		# t2 = buffer_salida[3]
+	addu	t0, t0, t2		
+	lb	t0, 0(t0)		# t0 = B64[t2]
+	sb	t0, 3(t1)		# buffer_salida[3] = t0
 
-	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
+write_1:
 
-	la t6, B64 #Tengo que pasar el indice leido a base64
+	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> wfd
+	la	a1, buffer_salida #a1-> direccion del primer caracter
+	li	a2, 1 #a2-> 1 byte
+	li	v0, SYS_write
+	syscall
 
-	addu a1, t4, t6 #pongo en a1 la direccion de memoria del dato a leer
+    bne a3, 0, error
 
-	nop#sw a1,32(sp) #actualizo valor de la pila
+write_2:    
 
-	lb t7,0(a1) #para debuggear. Puede valer 84, 87, 70 o 117
+	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> wfd
+	la	a1, buffer_salida + 1 #a1-> direccion del segundo caracter
+	li	a2, 1 #a2-> 1 byte
+	li	v0, SYS_write
+	syscall
 
-	la t9, write_c #en t9 está la subrutina write_c?
-	jalr t9 #salta a subrutina write_c
+    bne a3, 0, error
 
-	lw a0, (FRAME_SZ)(sp) #Salvo a0 que lo perdí cuando llamé al write
-	lw a1, (FRAME_SZ + 4)(sp)	#Salvo a1 que lo perdí cuando llamé al write
+write_3:
 
-	beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
+	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> wfd
+	la	a1, buffer_salida + 2 #a1-> direccion del tercer caracter
+	li	a2, 1 #a2-> 1 byte
+	li	v0, SYS_write
+	syscall
 
-	b lectura
+    bne a3, 0, error
 
-finalizar_escritura: 
-	nop#beq t0, t1, casodobleigual #se que es malo el nombre 
-	nop#beq t0, t2, casoigual 
-	b end_encode
+write_4:
 
-casodobleigual:
+	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> wfd
+	la	a1, buffer_salida + 3 #a1-> direccion del cuarto caracter
+	li	a2, 1 #a2-> 1 byte
+	li	v0, SYS_write
+	syscall
 
-	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
-	lw a1, 32(sp) #escribo t4
+    beq a3, 0, end
+    
+error:
+	li a0, 1
+	li v0, SYS_exit
+	syscall	
 
-	la t9, write_c #en t9 está la subrutina write_c?
-	jalr t9 #salta a subrutina write_c
-
-	beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
-
-	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
-	li a1, 00111101 #escribo el =
-
-	la t9, write_c #en t9 está la subrutina write_c?
-	jalr t9 #salta a subrutina write_c
-
-	beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
-
-	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
-	li a1, 00111101 #escribo el =
-
-	la t9, write_c #en t9 está la subrutina write_c?
-	jalr t9 #salta a subrutina write_c	
-
-	beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
-
-	b end_encode
-
-casoigual:
-
-	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
-	lw a1, 32(sp) #escribo t4
-
-	la t9, write_c #en t9 está la subrutina write_c?
-	jalr t9 #salta a subrutina write_c
-
-	beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
-
-	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
-	li a1, 00111101 #escribo el =
-
-	la t9, write_c #en t9 está la subrutina write_c?
-	jalr t9 #salta a subrutina write_c
-
-	beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
-
-	b end_encode
-
-readerr:
-	
-	li v0, 1
-
-	b end_encode
-
-writeerr:
-	
-	li v0, 2	
-
-	b end_encode 
-
-end_encode:
+end:
 	lw	a1,  (FRAME_SZ +  4)(sp)
 	lw	a0,  (FRAME_SZ     )(sp)
 
@@ -253,4 +206,5 @@ end_encode:
 .data  
 .align 2
 
-buffer: .space 1
+buffer_entrada: .space 3
+buffer_salida: .space 4	
