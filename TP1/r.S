@@ -58,4 +58,4 @@ end:
 .data  
 .align 2
 
-buffer: .space 4
+buffer: .space 1

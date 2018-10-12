@@ -126,8 +126,11 @@ caso2_encode:
 escritura: 
 	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
 
-	la t6, B64 #Tengo que pasar el indice leido a base64
-	addu a1, t3, t6 #pongo en a1 la direccion de memoria del dato a leer
+	la a1, buffer #a1 -> direccion del buffer
+	la t6, B64 #t6 -> direccion de la tabla
+	addu t6, t3, t6 #t6 -> direccion del elemento a escribir
+	lb s1,(t6)    #s1 = byte base64
+	sb s1,0(a1)   #cargo el byte en buffer+0
 
 	nop#sw a1,28(sp) #actualizo valor de la pila. SACADO EN VERSION NUEVA. PUEDE FALLAR
 
@@ -136,6 +139,7 @@ escritura:
 	la t9, write_c #en t9 está la subrutina write_c?
 	jalr t9 #salta a subrutina write_c
 
+	sw zero, buffer      #limpio el buffer
 	lw a0, (FRAME_SZ)(sp) #Salvo a0 que lo perdí cuando llamé al write
 	lw a1, (FRAME_SZ + 4)(sp)#Salvo a1 que lo perdí cuando llamé al write
 
@@ -245,3 +249,8 @@ end_encode:
 	jr ra
 
 .end encode
+
+.data  
+.align 2
+
+buffer: .space 1
