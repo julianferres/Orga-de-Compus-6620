@@ -24,6 +24,7 @@
 
 encode:
 	sub	sp,sp, FRAME_SZ
+
 	sw	$fp,(FRAME_SZ-16)(sp)
 	sw	gp,(FRAME_SZ-12)(sp)
 	sw	ra,(FRAME_SZ-8)(sp) 
@@ -60,15 +61,15 @@ lectura:
 
 	sb v0,36(sp) #guardo el resultado de la lectura en la pila
 	lb t5,36(sp) #en t5 está el carácter leído, t5 puede valer 77, 97 o 110
+	sw t5,36(sp) #actualizo el valor en la pila del caracter leído
 
-	lw t0,16(sp)
+	lw t0,16(sp) #se puede borrar de esta línea a la última del bloque
 	lw t1,20(sp)
 	lw t2,24(sp)
 	lw t3,28(sp)
 	lw t4,32(sp)
 	lw t5,36(sp)
 	lw a0,FRAME_SZ(sp)
-	lw v0,(FRAME_SZ+4)(sp) 
 
 	b ciclo_encode
 
@@ -126,10 +127,9 @@ escritura:
 	lw a0,(FRAME_SZ+4)(sp) #pongo en a0 wfd que esta en a1
 
 	la t6, B64 #Tengo que pasar el indice leido a base64
-
 	addu a1, t3, t6 #pongo en a1 la direccion de memoria del dato a leer
 
-	sw a1,28(sp) #actualizo valor de la pila
+	nop#sw a1,28(sp) #actualizo valor de la pila. SACADO EN VERSION NUEVA. PUEDE FALLAR
 
 	lb t7,0(a1) #para debuggear. Puede valer 84, 87, 70 o 117
 
@@ -137,7 +137,7 @@ escritura:
 	jalr t9 #salta a subrutina write_c
 
 	lw a0, (FRAME_SZ)(sp) #Salvo a0 que lo perdí cuando llamé al write
-	lw a1, (FRAME_SZ + 4)(sp)	#Salvo a1 que lo perdí cuando llamé al write
+	lw a1, (FRAME_SZ + 4)(sp)#Salvo a1 que lo perdí cuando llamé al write
 
 	beq v1, t2, writeerr #Valido que no haya habido errores en la escritura
 
@@ -153,7 +153,7 @@ volver_a_escribir:
 
 	addu a1, t4, t6 #pongo en a1 la direccion de memoria del dato a leer
 
-	sw a1,32(sp) #actualizo valor de la pila
+	nop#sw a1,32(sp) #actualizo valor de la pila
 
 	lb t7,0(a1) #para debuggear. Puede valer 84, 87, 70 o 117
 
@@ -168,8 +168,8 @@ volver_a_escribir:
 	b lectura
 
 finalizar_escritura: 
-	beq t0, t1, casodobleigual #se que es malo el nombre 
-	beq t0, t2, casoigual 
+	nop#beq t0, t1, casodobleigual #se que es malo el nombre 
+	nop#beq t0, t2, casoigual 
 	b end_encode
 
 casodobleigual:
@@ -233,6 +233,9 @@ writeerr:
 	b end_encode 
 
 end_encode:
+	lw	a1,  (FRAME_SZ +  4)(sp)
+	lw	a0,  (FRAME_SZ     )(sp)
+
 	lw $fp,(FRAME_SZ-16)(sp)
 	lw gp,(FRAME_SZ-12)(sp)
 	lw ra,(FRAME_SZ-8)(sp) #duda
@@ -242,6 +245,3 @@ end_encode:
 	jr ra
 
 .end encode
-
-.data	
-.align 2

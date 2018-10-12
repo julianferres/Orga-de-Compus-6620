@@ -15,29 +15,26 @@
 .set		reorder
 
 write_c:
-	nop
 	subu sp,sp, FRAME_SZ
-	sw ra,32(sp)
-	sw gp,28(sp)
 	sw $fp,24(sp)
+	.cprestore	 28
+	sw ra,32(sp)
+	nop#sw gp,28(sp)
 	move $fp,sp
 
-	 sw a0, 40(sp) #Salvo el file descriptor en el arg building area del caller
-	 sw a1, 44(sp) #Salvo el caracter a escribir en el 	arg building area del caller
+	nop#sw a0, 40(sp) #Salvo el file descriptor en el arg building area del caller
+	nop#sw a1, 44(sp) #Salvo el caracter a escribir en el 	arg building area del caller
 
-	 lb t6,0(a1) #para debuggear -> caracter a escribir. Puede ser 84, 87, 70 o 117
+	lb t6,0(a1) #para debuggear -> caracter a escribir. Puede ser 84, 87, 70 o 117
 
-	 li a2, 1 # Escribo solo un caracter(1byte)
+	li a2, 1 # Escribo solo un caracter(1byte)
 	 
-	 la v0, SYS_write #en v0 se almacena el syscall a ejecutar "sys_write" es una macro
+	la v0, SYS_write #en v0 se almacena el syscall a ejecutar "sys_write" es una macro
+	syscall #busca en v0 que funcion va a ejecutar y la ejecuta
 
-	 syscall #busca en v0 que funcion va a ejecutar y la ejecuta
+	beq a3, 0, end #success
 
-	 addi v1, v1, 0	
-
-	 beq a3, 0, end #success
-
-	 addi v1, v1, 2 #Cargo en v0 el codigo de error para devolverle al caller, quien validara.
+	nop#addi v1, v1, 2 #Cargo en v0 el codigo de error para devolverle al caller, quien validara.
  
 
 end:
