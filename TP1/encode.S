@@ -32,8 +32,21 @@ encode:
 	sw a0, FRAME_SZ(sp) #Salvo el file descriptor de entrada en el arg building area del caller a0 -> fp
 	sw a1, (FRAME_SZ+4)(sp) #Salvo el file descriptor de salida en el arg building area del caller a1 -> wfp
 
+limpieza_buffer:
+	la t0, buffer_entrada
+	sb    zero, 0(t0)
+    sb    zero, 1(t0)
+    sb    zero, 2(t0)
+
+    la t1, buffer_salida
+	sb    zero, 0(t1)
+    sb    zero, 1(t1)
+    sb    zero, 2(t1)
+    sb    zero, 3(t1)
+
 lectura_inicial:
 	la t0, buffer_entrada #aca podríamos llenar de cero para verificar que quede todo en cero pero podría no ser necesario
+
 	li t1, 0 #inicializo contador en 0
 	li t6, 1 #para comparar el contador
 
@@ -177,10 +190,10 @@ escribir_doble_padding:
 	sb	t0, 1(t2)		# buffer_salida[1] = t0
 
 	## Escribir dos iguales
+	li t0, 64
 
 	li t0, '=' # Guardo = en t0
 	sb t0, 2(t2) #buffer_salida[2] = t0
-	li t0, '=' # Guardo = en t0
 	sb t0, 3(t2) #buffer_salida[3] = t0
 
 	b write_1
@@ -200,7 +213,6 @@ escribir_simple_padding:
 	sb	t0, 2(t2)		# buffer_salida[2] = t0
 
 	## Escribir un igual
-
 	li t0, '=' # Guardo = en t0
 	sb t0, 3(t2) #buffer_salida[3] = t0
 
@@ -208,6 +220,9 @@ write_1:
 
 	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> wfd
 	la	a1, buffer_salida #a1-> direccion del primer caracter
+
+	lb t5, 0(a1) #Debuggear
+
 	li	a2, 1 #a2-> 1 byte
 	li	v0, SYS_write
 	syscall
@@ -218,6 +233,7 @@ write_2:
 
 	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> wfd
 	la	a1, buffer_salida + 1 #a1-> direccion del segundo caracter
+	
 	li	a2, 1 #a2-> 1 byte
 	li	v0, SYS_write
 	syscall
@@ -225,9 +241,9 @@ write_2:
     bne a3, 0, error
 
 write_3:
-
 	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> wfd
 	la	a1, buffer_salida + 2 #a1-> direccion del tercer caracter
+
 	li	a2, 1 #a2-> 1 byte
 	li	v0, SYS_write
 	syscall
@@ -238,9 +254,14 @@ write_4:
 
 	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> wfd
 	la	a1, buffer_salida + 3 #a1-> direccion del cuarto caracter
+
+	lb t5, 0(a1) #Debuggear = 61
+
 	li	a2, 1 #a2-> 1 byte
 	li	v0, SYS_write
 	syscall
+
+	lb t7, 0(a1) #debugger
 
     beq a3, 0, lectura_inicial	
     
@@ -269,5 +290,9 @@ end:
 .data  
 .align 2
 
-buffer_entrada: .space 3
-buffer_salida: .space 4	
+buffer_entrada: 
+	.space 3
+	.byte	0, 0, 0
+buffer_salida: 
+	.space 4
+	.byte	0, 0, 0, 0		
