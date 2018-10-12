@@ -32,10 +32,10 @@ encode:
 	sw a0, FRAME_SZ(sp) #Salvo el file descriptor de entrada en el arg building area del caller a0 -> fp
 	sw a1, (FRAME_SZ+4)(sp) #Salvo el file descriptor de salida en el arg building area del caller a1 -> wfp
 
-
-lectura_1:
+lectura_inicial:
 	la t0, buffer_entrada #aca podríamos llenar de cero para verificar que quede todo en cero pero podría no ser necesario
 	li t1, 0 #inicializo contador en 0
+	li t6, 1 #para comparar el contador
 
 	lw	a0, (FRAME_SZ)(sp) #a0 -> file descriptor
 	la	a1, buffer_entrada #a1 -> buffer de entrada
@@ -43,9 +43,10 @@ lectura_1:
 	li	v0, SYS_read
 	syscall
 
-	bne a3, 0, error #agregar = FALTA
+	bne a3, 0, error 
+	beq v0, 0, end #si leyo EOF que termine el programa
 
-lectura_2:
+lectura_1:
 	addiu t1, t1, 1 #contador ++
 
 	lw	a0, (FRAME_SZ)(sp) #a0 -> file descriptor
@@ -54,9 +55,11 @@ lectura_2:
  	li	v0, SYS_read 
  	syscall
 
+ 	beq v0, zero, primer_caracter #si termino de leer que vaya a ciclo
+
  	bne a3, 0, error #agregar = FALTA
 
-lectura_3:
+lectura_2:
 	addiu t1, t1, 1 #contador ++
 
 	lw	a0, (FRAME_SZ)(sp) #a0 -> file descriptor
@@ -67,13 +70,13 @@ lectura_3:
 
  	bne a3, 0, error #agregar = FALTA	
 
-ciclo:
+primer_caracter:
 	la t0, buffer_entrada
 	la t2, buffer_salida
 
 	## Codificación primera lectura
 
-	lbu	t3, 0(t0) 		# t3 = buffer_entrada[0] = buffer
+	lbu	t3, 0(t0) 	# t3 = buffer_entrada[0] = buffer
 
 	and t4, t3, a1mask # t4 = a1 = buffer & a1mask
 	srl t4, t4, 2     # t4 = a1 = a1 >> 2
@@ -82,6 +85,22 @@ ciclo:
 	sll t5, t5, 4 # t5 = a2 = a2 <<< 4
 
 	sb t4, 0(t2)	# buffer_salida[0] = a1
+
+	## Pasar a B64
+
+	la t0, B64	# t0 = direccion de la tabla
+
+	lbu	t3, 0(t2)		# t3 = buffer_salida[0]
+	addu t0, t0, t3		
+	lb	t0, 0(t0)		# t0 = B64[t3]
+	sb	t0, 0(t2)		# buffer_salida[0] = t0
+
+	beq t1, t6, escribir_doble_padding #si el contador esta en 1 es porque no tenía segundo caracter para leer y hay que agregar dos iguales
+
+segundo_caracter:
+
+	la t0, buffer_entrada
+	la t2, buffer_salida
 
 	## Codificación segunda lectura
 
@@ -96,6 +115,22 @@ ciclo:
 
 	sb t4, 1(t2)	# buffer_salida[1] = b1
 
+	## Pasar a b64
+
+	la t0, B64	# t0 = direccion de la tabla
+
+	lbu	t3, 1(t2)		# t3 = buffer_salida[1]
+	addu t0, t0, t3		
+	lb	t0, 0(t0)		# t0 = B64[t3]
+	sb	t0, 1(t2)		# buffer_salida[1] = t0
+
+	beq v0, zero, escribir_simple_padding
+
+tercer_cuarto_caracter:
+
+	la t0, buffer_entrada
+	la t2, buffer_salida
+
 	## Codificación tercera lectura
 
 	lbu	t3, 2(t0) 	# t3 = buffer_entrada[2] = buffer
@@ -109,40 +144,65 @@ ciclo:
 	sb t4, 2(t2)	# buffer_salida[2] = c1
 	sb t5, 3(t2)    # buffer_salida[3] = c2
 
-
-encode_to_b64:
+	## Pasar a b64
 
 	la	t0, B64	# t0 = direccion de la tabla
-	la	t1, buffer_salida	# t1 = direccion del buffer
 
-	lbu	t2, 0(t1)		# t2 = buffer_salida[0]
-	addu t0, t0, t2		
-	lb	t0, 0(t0)		# t0 = B64[t2]
-	sb	t0, 0(t1)		# buffer_salida[0] = t0
+	lbu	t3, 2(t2)		# t3 = buffer_salida[2]
+	addu	t0, t0, t3		
+	lb	t0, 0(t0)		# t0 = B64[t3]
+	sb	t0, 2(t2)		# buffer_salida[2] = t0
 
-	la	t0, B64	# t0 = encode_table
-	la	t1, buffer_salida	# t1 = direccion del buffer
+	la	t0, B64	# t0 = direccion de la tabla
 
-	lbu	t2, 1(t1)		# t2 = buffer_salida[1]
-	addu t0, t0, t2		
-	lb	t0, 0(t0)		# t0 = B64[t2]
-	sb	t0, 1(t1)		# buffer_salida[1] = t0
+	lbu	t3, 3(t2)		# t3 = buffer_salida[3]
+	addu	t0, t0, t3		
+	lb	t0, 0(t0)		# t0 = B64[t3]
+	sb	t0, 3(t2)		# buffer_salida[3] = t0
 
-	la	t0, B64	# t0 = encode_table
-	la	t1, buffer_salida	# t1 = direccion del buffer
+	b write_1
 
-	lbu	t2, 2(t1)		# t2 = buffer_salida[2]
-	addu	t0, t0, t2		
-	lb	t0, 0(t0)		# t0 = B64[t2]
-	sb	t0, 2(t1)		# buffer_salida[2] = t0
+escribir_doble_padding:
 
-	la	t0, B64	# t0 = encode_table
-	la	t1, buffer_salida	# t1 = direccion del buffer
+	la t2, buffer_salida
 
-	lbu	t2, 3(t1)		# t2 = buffer_salida[3]
-	addu	t0, t0, t2		
-	lb	t0, 0(t0)		# t0 = B64[t2]
-	sb	t0, 3(t1)		# buffer_salida[3] = t0
+	sb t5, 1(t2)	# buffer_salida[1] = a2
+
+	## Pasar a B64
+	la t0, B64	# t0 = direccion de la tabla
+
+	lbu	t3, 1(t2)		# t3 = buffer_salida[1]
+	addu t0, t0, t3		
+	lb	t0, 0(t0)		# t0 = B64[t3]
+	sb	t0, 1(t2)		# buffer_salida[1] = t0
+
+	## Escribir dos iguales
+
+	li t0, '=' # Guardo = en t0
+	sb t0, 2(t2) #buffer_salida[2] = t0
+	li t0, '=' # Guardo = en t0
+	sb t0, 3(t2) #buffer_salida[3] = t0
+
+	b write_1
+
+escribir_simple_padding:
+
+	la t2, buffer_salida
+
+	sb t5, 2(t2)	# buffer_salida[2] = b2
+
+	## Pasar a B64
+	la t0, B64	# t0 = direccion de la tabla
+
+	lbu	t3, 2(t2)		# t3 = buffer_salida[1]
+	addu t0, t0, t3		
+	lb	t0, 0(t0)		# t0 = B64[t3]
+	sb	t0, 2(t2)		# buffer_salida[2] = t0
+
+	## Escribir un igual
+
+	li t0, '=' # Guardo = en t0
+	sb t0, 3(t2) #buffer_salida[3] = t0
 
 write_1:
 
@@ -182,14 +242,17 @@ write_4:
 	li	v0, SYS_write
 	syscall
 
-    beq a3, 0, end
+    beq a3, 0, lectura_inicial	
     
 error:
+
 	li a0, 1
 	li v0, SYS_exit
 	syscall	
 
 end:
+
+	li v0, 0
 	lw	a1,  (FRAME_SZ +  4)(sp)
 	lw	a0,  (FRAME_SZ     )(sp)
 
