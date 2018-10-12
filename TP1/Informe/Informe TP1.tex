@@ -1,0 +1,131 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{fancyvrb}
+\usepackage{graphicx}
+\usepackage[ansinew]{inputenc}
+\usepackage{hyperref}
+\title{ \Huge \textbf{Trabajo Práctico \#1:\\ \LARGE Conjunto de instrucciones MIPS}}
+\author{\LARGE Julian Ferres, \textit{Padrón Nro. 101483}                     \\
+	\LARGE    \texttt{julianferres@gmail.com}                                              \\[2.5ex]
+	\LARGE    Cecilia María Hortas, \textit{Padrón Nro. 100687}                     \\
+	\LARGE    \texttt{ceci.hortas@gmail.com}                                              \\[2.5ex]
+	\LARGE     Matías Ezequiel Scakosky, \textit{Padrón Nro. 99627}                     \\
+	\LARGE     \texttt{scakosky@hotmail.com}                                              \\[2.5ex]
+	\LARGE   2do. Cuatrimestre de 2018                                      \\        
+	\Large  66.20 Organización de Computadoras  $-$ Práctica Martes  \\        
+	\Large  Facultad de Ingeniería, Universidad de Buenos Aires            \\
+}
+\date{}
+\begin{document}
+	\maketitle
+	% quita el número en la primer página
+	\thispagestyle{empty}
+	\begin{abstract}
+		\large Se propone como objetivo del Trabajo Práctico realizar un programa que utilice código en C y en Assembly MIPS para codificar y decodificar información en base64. Se utiliza el programa GXemul para simular el entorno de desarrollo, una máquina MIPS que corre una versión de NetBSD.
+	\end{abstract}
+	\newpage
+	\tableofcontents
+	\newpage
+	\section{Introducción}
+	Se propone escribir un programa cuya función principal se realice en C y desde allí se llame a subrutinas programadas en código MIPS32 que se encarguen de codificar o decodificar información de base64. Se cuentan con una serie de comandos básicos para el desarrollo del programa que serán detallados en el subtítulo de Implementacion. El objetivo principal del programa consiste en realizar una acción que puede ser codificar o decodificar a partir de un archivo de entrada y generar un archivo de salida. En caso de no recibir los nombres de archivos se utiliza por defecto los streams standar stdin y stdout. Esto mismo ya fue realizado en el Trabajo Práctico 0 pero la novedad radica en implementar dichas funciones en MIPS32.
+	\section{Documentación relevante al diseño e implementación del programa}
+	A partir de la consigna se determina que los comandos que debe incluir el programa son:
+	\texttt{-h, --help Despliega el menú de ayuda}
+	\texttt{-V, --version Imprime la versión y cierra el programa}
+	\texttt{-i, --input Determina la ubicación del archivo de entrada}
+	\texttt{-o, --output Determina la ubicación del archivo de salida}
+	\texttt{-a, --action Determina la acción que ejecuta el programa: codificar (por defecto) o decodificar}
+	\subsection{Diseño}
+	El programa principal se encuentra desarrollado en la función \texttt{main}. Se detalla todo lo relativo al manejo de los comandos y se utiliza la libería \texttt{getopt.h}. Se guarda en el archivo \texttt{main.c}
+	Las acciones de codificar y decodificar se separan en subrutinas distintas y se implementan siguiendo una lógica similar. Ambas están en los archivos \texttt{code.S}\\ y \texttt{decode.S}\\ respectivamente. Así mismo se desarrollan otras subrutinas para modularizar el código y que sea más claro. Se tiene entonces los archivos \texttt{write\_c.S} para escribir un carácter, \texttt{read\_c.S} para leer un carácter y \texttt{getb64index.S}
+	Pueden encontrar el codigo de nuestro programa en el repositorio:
+	\url{https://github.com/chortas/Orga-de-Compus-6620}\footnote{Allí se encuentran tres carpetas: TP0, TP1 e Información. Todo lo detallado en este informe se encuentra en la carpeta TP1.}
+	\subsection{Detalle de implementación}
+	\subsubsection{Subrutina encode}
+	\subsubsection{Subrutina decode}
+	\subsubsection{Subrutina write\_c}
+	\subsubsection{Subrutina read\_c}
+	\subsubsection{Subrutina geti64\_c}
+	\subsubsection{Función principal main}
+	\section{Comandos para compilar el programa}
+	En esta sección se detallan los pasos para compilar el programa en NetBSD a partir del entorno proporcionado por GXemul.
+	\begin{itemize}
+		\item Desde el directorio donde se instaló GXemul se corre el siguiente comando para bootear la imagen del disco patrón:
+		\texttt{hostOS\# ./gxemul -e 3max -d netbsd-pmax.img} 
+		\item Desde otra consola de linux se crea en el host OS con el usuario root un alias para la interfaz loopback (lo:0) con la IP 172.20.0.1 con el siguiente comando:
+		\texttt{hostOS\# ifconfig lo:0 172.20.0.1}
+		\item Luego se ejecutan los siguientes comandos para la conexión contra la interfaz creada: 
+		
+		\texttt{hostOS\# export TERM=xterm}
+		
+		\texttt{hostOS\# ssh -p 2222 root@127.0.0.1}
+		
+		\item Se transfieren los archivos a compilar a NetBSD con los siguientes comandos:
+		
+		\texttt{scp -P2222 -r TP1 root@127.0.0.1:/root/TP0NetBSD}
+		
+		\item Luego se ejecutan los siguientes comandos para realizar la compilación y extraer el código MIPS generado por el compilador en el sistema operativo que corre sobre GXemul:
+		
+		\texttt{root@:~\# ls}
+		
+		\texttt{root@:~\# pwd}
+		
+		\texttt{root@:~\# mkdir TP1NetBSD}
+		
+		\texttt{root@:~\# cd TP1NetBSD}
+		
+		\texttt{root@:~/TP1NetBSD/TP1\# gcc -Wall -O0 -S -mrnames *.c}
+		
+		\begin{itemize}
+			\item \texttt{-s} para detener el compilador luego de generar el código assembly.
+			
+			\item \texttt{-mrnames} para cambiar los números de los registros por sus nombres de convención
+			
+		\end{itemize}
+		\item Luego se transfiere el archivo .s para el sistema operativo sobre el cual corre GXemul:
+		
+		\texttt{hostOS\# scp -P2222 root@127.0.0.1:/root/TP1NetBSD/TP1/*.s /home/user}
+	\end{itemize}
+	\section{Corridas de prueba}
+	Las pruebas realizadas se basaron en los ejemplos del enunciado. Se probaron los comandos básicos como \texttt{-h} y \texttt{-V} para probar que muestren el resultado esperado.
+	Luego, para probar los comandos \texttt{-a action -i input -o output} se realizó lo siguiente:
+	\begin{itemize}
+		\item Se probó que de omitir esos comandos la acción por default sea la ejecución de \texttt{encode} con la entrada por \texttt{stdin} y la salida generada por \texttt{stdout}.
+		\item Se probó que de omitir nombres de archivos de \texttt{input} y \texttt{output} los archivos tomados por default eran los \textit{stream} stándar.
+		\item Se probó que de recibir los nombres de archivos de entrada y salida las acciones esperadas se concretaban. Se tomaron los ejemplos mencionados en el enunciado.
+		\item Finalmente se ejecutó el siguiente comando en la terminal para verificar que archivos de tamaño creciente codificaban y decodificaban correctamente: 
+		\texttt{n=1;while :; do head -c n </dev/urandom >/tmp/in.bin; ./main -a encode -i /tmp/in.bin -o /tmp/out.b64; ./main -a decode -i /tmp/out.b64 -o /tmp/out.bin; if diff /tmp/in.bin /tmp/out.bin; then :; else  echo ERROR: n; break; fi; echo ok: n; n=((n+1));  rm -f /tmp/in.bin /tmp/out.b64 /tmp/out.bin; done}
+	\end{itemize}
+	\section{Código fuente en C}
+	\subsection{main.c}
+	\begin{Verbatim}
+	\end{Verbatim}
+	\section{Código implementado en MIPS32}
+	\subsection{code.s}
+	\begin{Verbatim}
+	\end{Verbatim}
+	\subsection{decode.s}
+	\begin{Verbatim}
+	\end{Verbatim}
+	\subsection{write\_c.s}
+	\begin{Verbatim}
+	\end{Verbatim}
+	\subsection{read\_c.s}
+	\begin{Verbatim}
+	\end{Verbatim}
+	\subsection{getb64index.s}
+	\begin{Verbatim}
+	\end{Verbatim}
+	\section{Conclusiones}
+	En conclusión, se cumplió el objetivo del Trabajo Práctico ya que se desarrolló el programa detallado por el enunciado. Los comandos del programa se ejecutan como detalla el comando \texttt{-h} y tras ser sometidos a distintas pruebas se concluye que funcionan según lo esperado. Así mismo fue posible la implementación del código en MIPS32 y se pudo utilizar el programa GXemul para simular un entorno de desarrollo de una maquina MIPS corriendo el sistema operativo NetBSD para ejecutarlo.
+	\begin{thebibliography}{99}
+		\bibitem{}  GXemul, http://gavare.se/gxemul/.
+		\bibitem{} J. L. Hennessy and D. A. Patterson, ``Computer Architecture. A Quantitative
+		Approach,'' 3ra Edición, Morgan Kaufmann Publishers, 2000.
+		\bibitem{} J. Larus and T. Ball, ``Rewriting Executable Files to Mesure Program Behavior,'' Tech. Report 1083, Univ. of Wisconsin, 1992.
+		\bibitem{} The NetBSD project, http://www.netbsd.org/.
+		\bibitem{} Base64 (Wikipedia), http://en.wikipedia.org/wiki/Base64
+		\bibitem{} Base64 Enconde and Decode - Online, https://www.base64encode.org/
+		\bibitem{} Getopt Long Option Example (The GNU C library), https://www.gnu.org/
+		\bibitem{} MIPS RISC Processor, http://www.sco.com/developers/devspecs/mipsabi.pdf
+	\end{thebibliography}
+\end{document}
