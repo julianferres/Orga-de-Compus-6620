@@ -60,7 +60,7 @@ int main (int argc, char const *argv[]) {
     		case 'i': 
                 if (! strcmp(optarg,"-")) continue;
                 FILE* fp = fopen(optarg, "r");
-                if(! fd) { fprintf(stderr, "File not found \n"); return 1; }
+                if(! fp) { fprintf(stderr, "File not found \n"); return 1; }
     			fd = fileno(fp);
                 //fclose(fp);
     			
@@ -69,10 +69,8 @@ int main (int argc, char const *argv[]) {
     		case 'o': 
                 if (! strcmp(optarg,"-")) continue;
                 FILE* wfp = fopen(optarg, "w");
-                if(! wfd) { fprintf(stderr, "File not found \n"); return 1; }
+                if(! wfp) { fprintf(stderr, "File error \n"); return 1; }
                 wfd = fileno(wfp);
-                //fclose(wfp);
-                
     			break;
 
     		case 0:
