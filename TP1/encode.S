@@ -1,7 +1,7 @@
 #include <mips/regdef.h>
 #include <sys/syscall.h>
 
-#define FRAME_SZ 100
+#define FRAME_SZ 48
 
 #define a1mask	0xFC
 #define a2mask	0x03 		
@@ -234,8 +234,6 @@ write_1:
 	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> wfd
 	la	a1, buffer_salida #a1-> direccion del primer caracter
 
-	lb t5, 0(a1) #Debuggear
-
 	li	a2, 1 #a2-> 1 byte
 	li	v0, SYS_write
 	syscall
@@ -268,13 +266,9 @@ write_4:
 	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> wfd
 	la	a1, buffer_salida + 3 #a1-> direccion del cuarto caracter
 
-	lb t5, 0(a1) #Debuggear = 61
-
 	li	a2, 1 #a2-> 1 byte
 	li	v0, SYS_write
 	syscall
-
-	lb t7, 0(a1) #debugger
 
     beq a3, 0, lectura_inicial	
     
