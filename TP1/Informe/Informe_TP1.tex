@@ -186,18 +186,22 @@ int main (int argc, char const *argv[]) {
 			case 'i': 
 				if (! strcmp(optarg,"-")) continue;
 				FILE* fp = fopen(optarg, "r");
+				
+				if(! fd) {
+					fprintf(stderr, "File not found \n"); 
+					return 1; 
+				}
 				fd = fileno(fp);
-	
-				if(! fd) { fprintf(stderr, "File not found \n"); return 1; }
-				continue;
-	
+				
 			case 'o': 
 				if (! strcmp(optarg,"-")) continue;
 				FILE* wfp = fopen(optarg, "w");
+				
+				if(! wfd) { 
+					fprintf(stderr, "File not found \n"); 
+					return 1;
+				} 
 				wfd = fileno(wfp);
-				if(! wfd) { fprintf(stderr, "File not found \n"); return 1; }
-				break;
-	
 			case 0:
 				abort();
 		}
@@ -221,7 +225,7 @@ int main (int argc, char const *argv[]) {
 	close(wfd);    
 	return 0;
 }			
-	\end{Verbatim}
+\end{Verbatim}
 	
 	\subsection{base64.h}
 	
@@ -245,15 +249,724 @@ extern char B64[64];
 #endif
 \end{verbatim}	
 	
+\section{Código implementado en MIPS32}
+\subsection{code.s}
+\begin{Verbatim}
+#include <mips/regdef.h>
+#include <sys/syscall.h>
+
+#define FRAME_SZ 48
+
+#define a1mask	0xFC
+#define a2mask	0x03 		
+#define b1mask	0xF0
+#define b2mask	0x0F
+#define c1mask 0xC0
+#define c2mask 0X3F
+
+.text
+.abicalls
+.align 2
+
+.globl		encode
+.ent		encode
+
+.set		noreorder
+.cpload		t9
+.set		reorder
+
+encode:
+	sub	sp,sp, FRAME_SZ
+
+	sw	$fp,(FRAME_SZ-16)(sp)
+	sw	gp,(FRAME_SZ-12)(sp)
+	sw	ra,(FRAME_SZ-8)(sp) 
+	move	$fp,sp
+
+	sw t1,20(sp) #guardo t0 en el area de la pila de las variables locales
+
+
+	sw a0, FRAME_SZ(sp) #Salvo el file descriptor de entrada en el arg building area del caller a0 -> fp
+	sw a1, (FRAME_SZ+4)(sp) #Salvo el file descriptor de salida en el arg building area del caller a1 -> wfp
+
+limpieza_buffer:
+	la t0, buffer_entrada
+	sb    zero, 0(t0)
+	sb    zero, 1(t0)
+	sb    zero, 2(t0)
+
+	la t1, buffer_salida
+	sb    zero, 0(t1)
+	sb    zero, 1(t1)
+	sb    zero, 2(t1)
+	sb    zero, 3(t1)
+
+lectura_inicial:
+	la t0, buffer_entrada #aca podríamos llenar de cero para verificar que quede todo en cero pero podría no ser necesario
+
+	li t1, 0 #inicializo contador en 0
+	sw t1, (20)(sp) #lo guardo en la pila
+
+	lw	a0, (FRAME_SZ)(sp) #a0 -> file descriptor
+	la	a1, buffer_entrada #a1 -> buffer de entrada
+	li	a2, 1 #a2 -> leer 1 byte
+	li	v0, SYS_read
+	syscall
+
+##Recupero t1 despues de la syscall
+	lw t1, (20)(sp) 
+
+	bne a3, 0, error 
+	beq v0, 0, end #si leyo EOF que termine el programa
+
+lectura_1:
+	lw	a0, (FRAME_SZ)(sp) #a0 -> file descriptor
+	la	a1, buffer_entrada + 1 #a1 -> buffer de entrada + 1
+	li	a2, 1 #a2 -> leer 1 byte
+	li	v0, SYS_read 
+	syscall
+
+	##Recupero t1 despues de la syscall
+	lw t1, (20)(sp) 
+
+	beq v0, zero, primer_caracter #si termino de leer que vaya a ciclo
+
+	bne a3, 0, error #agregar = FALTA
+
+	addiu t1, t1, 1 #contador ++
+	sw t1, (20)(sp) #lo guardo en la pila
+
+lectura_2:
+	lw	a0, (FRAME_SZ)(sp) #a0 -> file descriptor
+	la	a1, buffer_entrada + 2 #a1 -> buffer de entrada + 1
+	li	a2, 1 #a2 -> leer 1 byte
+	li	v0, SYS_read 
+	syscall
+
+	##Recupero t1 despues de la syscall
+	lw t1, (20)(sp) 
 	
+	bne a3, 0, error #agregar = FALTA	
+	addiu t1, t1, 1 #contador ++
+	sw t1, (20)(sp) #lo guardo en la pila
+
+primer_caracter:
+	la t0, buffer_entrada
+	la t2, buffer_salida
 	
-	\section{Código implementado en MIPS32}
-	\subsection{code.s}
-	\begin{Verbatim}
-	\end{Verbatim}
-	\subsection{decode.s}
-	\begin{Verbatim}
-	\end{Verbatim}
+	## Codificación primera lectura
+	
+	lbu	t3, 0(t0) 	# t3 = buffer_entrada[0] = buffer
+	
+	and t4, t3, a1mask # t4 = a1 = buffer & a1mask
+	srl t4, t4, 2     # t4 = a1 = a1 >> 2
+	
+	and t5, t3, a2mask # t5 = a2 = buffer & a2mask
+	sll t5, t5, 4 # t5 = a2 = a2 <<< 4
+	
+	sb t4, 0(t2)	# buffer_salida[0] = a1
+	
+	## Pasar a B64
+	
+	la t0, B64	# t0 = direccion de la tabla
+	
+	lbu	t3, 0(t2)		# t3 = buffer_salida[0]
+	addu t0, t0, t3		
+	lb	t0, 0(t0)		# t0 = B64[t3]
+	sb	t0, 0(t2)		# buffer_salida[0] = t0
+	
+	beq t1, zero, escribir_doble_padding #si el contador esta en 1 es porque no tenía segundo caracter para leer y hay que agregar dos iguales
+
+segundo_caracter:
+
+	la t0, buffer_entrada
+	la t2, buffer_salida
+	
+	## Codificación segunda lectura
+	
+	lbu	t3, 1(t0) 	# t3 = buffer_entrada[1] = buffer
+	
+	and t4, t3, b1mask # t4 = b1 = buffer & b1mask
+	srl t4, t4, 4     # t4 = b1 = b1 >> 4
+	or t4, t4, t5 # t4 = b1 = b1 | a2
+	
+	and t5, t3, b2mask # t5 = b2 = buffer & b2mask
+	sll t5, t5, 2 # t5 = b2 = b2 <<< 2
+	
+	sb t4, 1(t2)	# buffer_salida[1] = b1
+	
+	## Pasar a b64
+	
+	la t0, B64	# t0 = direccion de la tabla
+	
+	lbu	t3, 1(t2)		# t3 = buffer_salida[1]
+	addu t0, t0, t3		
+	lb	t0, 0(t0)		# t0 = B64[t3]
+	sb	t0, 1(t2)		# buffer_salida[1] = t0
+	
+	beq v0, zero, escribir_simple_padding
+
+tercer_cuarto_caracter:
+
+	la t0, buffer_entrada
+	la t2, buffer_salida
+	
+	## Codificación tercera lectura
+	
+	lbu	t3, 2(t0) 	# t3 = buffer_entrada[2] = buffer
+	
+	and t4, t3, c1mask # t4 = c1 = buffer & c1mask
+	srl t4, t4, 6     # t4 = c1 = c1 >> 6
+	or t4, t4, t5 # t4 = c1 = c1 | b2
+	
+	and t5, t3, c2mask # t5 = c2 = buffer & c2mask
+	
+	sb t4, 2(t2)	# buffer_salida[2] = c1
+	sb t5, 3(t2)    # buffer_salida[3] = c2
+	
+	## Pasar a b64
+	
+	la	t0, B64	# t0 = direccion de la tabla
+	
+	lbu	t3, 2(t2)		# t3 = buffer_salida[2]
+	addu	t0, t0, t3		
+	lb	t0, 0(t0)		# t0 = B64[t3]
+	sb	t0, 2(t2)		# buffer_salida[2] = t0
+	
+	la	t0, B64	# t0 = direccion de la tabla
+	
+	lbu	t3, 3(t2)		# t3 = buffer_salida[3]
+	addu	t0, t0, t3		
+	lb	t0, 0(t0)		# t0 = B64[t3]
+	sb	t0, 3(t2)		# buffer_salida[3] = t0
+	
+	b write_1
+
+escribir_doble_padding:
+
+	la t2, buffer_salida
+	
+	sb t5, 1(t2)	# buffer_salida[1] = a2
+	
+	## Pasar a B64
+	la t0, B64	# t0 = direccion de la tabla
+	
+	lbu	t3, 1(t2)		# t3 = buffer_salida[1]
+	addu t0, t0, t3		
+	lb	t0, 0(t0)		# t0 = B64[t3]
+	sb	t0, 1(t2)		# buffer_salida[1] = t0
+	
+	## Escribir dos iguales
+	li t0, 64
+	
+	li t0, '=' # Guardo = en t0
+	sb t0, 2(t2) #buffer_salida[2] = t0
+	sb t0, 3(t2) #buffer_salida[3] = t0
+	
+	b write_1
+
+escribir_simple_padding:
+
+	la t2, buffer_salida
+	
+	sb t5, 2(t2)	# buffer_salida[2] = b2
+	
+	## Pasar a B64
+	la t0, B64	# t0 = direccion de la tabla
+	
+	lbu	t3, 2(t2)		# t3 = buffer_salida[1]
+	addu t0, t0, t3		
+	lb	t0, 0(t0)		# t0 = B64[t3]
+	sb	t0, 2(t2)		# buffer_salida[2] = t0
+	
+	## Escribir un igual
+	li t0, '=' # Guardo = en t0
+	sb t0, 3(t2) #buffer_salida[3] = t0
+
+write_1:
+
+	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> wfd
+	la	a1, buffer_salida #a1-> direccion del primer caracter
+	
+	li	a2, 1 #a2-> 1 byte
+	li	v0, SYS_write
+	syscall
+	
+	bne a3, 0, error
+
+write_2:    
+
+	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> wfd
+	la	a1, buffer_salida + 1 #a1-> direccion del segundo caracter
+	
+	li	a2, 1 #a2-> 1 byte
+	li	v0, SYS_write
+	syscall
+	
+	bne a3, 0, error
+
+write_3:
+	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> wfd
+	la	a1, buffer_salida + 2 #a1-> direccion del tercer caracter
+	
+	li	a2, 1 #a2-> 1 byte
+	li	v0, SYS_write
+	syscall
+	
+	bne a3, 0, error
+
+write_4:
+	
+	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> wfd
+	la	a1, buffer_salida + 3 #a1-> direccion del cuarto caracter
+	
+	li	a2, 1 #a2-> 1 byte
+	li	v0, SYS_write
+	syscall
+	
+	beq a3, 0, lectura_inicial	
+
+error:
+
+	li a0, 1
+	li v0, SYS_exit
+	syscall	
+
+end:
+	
+	li v0, 0
+	lw	a1,  (FRAME_SZ +  4)(sp)
+	lw	a0,  (FRAME_SZ     )(sp)
+	
+	lw $fp,(FRAME_SZ-16)(sp)
+	lw gp,(FRAME_SZ-12)(sp)
+	lw ra,(FRAME_SZ-8)(sp) #duda
+	
+	addu sp,sp,FRAME_SZ #Libero el stackFrame
+	
+	jr ra
+
+.end encode
+
+.data  
+.align 2
+
+buffer_entrada: 
+	.space 3
+	.byte	0, 0, 0
+buffer_salida: 
+	.space 4
+	.byte	0, 0, 0, 0			
+\end{Verbatim}
+\subsection{decode.s}
+\begin{Verbatim}
+#include <mips/regdef.h>
+#include <sys/syscall.h>
+
+#define FRAME_SZ 32
+
+#define mask1d	0x30 
+#define mask2d	0x3C
+#define mask3d	0x3F
+
+.data	
+.text
+.abicalls
+.align 2
+
+.globl		decode
+.ent		decode
+
+.set		noreorder
+.cpload		t9
+.set		reorder
+
+decode:
+
+	subu 	sp,  sp, FRAME_SZ
+
+	sw      gp,  (FRAME_SZ - 24)(sp)
+	sw 	    $fp, (FRAME_SZ - 20)(sp)
+	sw 	    ra,  (FRAME_SZ - 16)(sp)
+	sw      s2,  (FRAME_SZ - 12)(sp)
+	sw      s3,  (FRAME_SZ - 8)(sp)
+
+	move    $fp, sp
+
+	sw 	    a0,  (FRAME_SZ     )(sp)
+	sw 	    a1,  (FRAME_SZ +  4)(sp)
+
+##LECTURAS 
+
+primer_lectura: 
+
+	lw a0, (FRAME_SZ)(sp)
+	la a1, in_buffer
+	li a2, 1
+	li v0, SYS_read
+	syscall
+
+	beq a3, zero, primer_validacion_lectura
+
+	b error_lectura
+
+primer_validacion_lectura:
+
+	li s2, 0 #La cuenta de los bytes leidos
+	addu s2, s2, v0 #Suma 1 si leyo algun byte, 0 si no
+
+	beq s2, 1, segunda_lectura #Si s2 es 0, leimos un EOF
+
+	b salida_exitosa
+
+segunda_lectura:
+
+	lw a0, (FRAME_SZ)(sp)
+	la a1, in_buffer + 1 
+	li a2, 1
+	li v0, SYS_read
+	syscall #Leo segundo byte
+
+	beq a3, zero, segunda_validacion_lectura
+
+	b error_lectura
+	
+segunda_validacion_lectura:
+
+	addu s2, s2, v0 #Suma 1 si leyo algun byte, 0 si no
+
+	beq s2, 2, tercera_lectura #Si s2 es 1, leimos un EOF
+
+	b cantidad_de_bytes_inconsistente
+
+tercera_lectura:
+
+	lw a0, (FRAME_SZ)(sp)
+	la a1, in_buffer + 2
+	li a2, 1
+	li v0, SYS_read
+	syscall
+
+	beq a3, zero, tercer_validacion_lectura
+
+	b error_lectura
+
+tercer_validacion_lectura:
+
+	addu s2, s2, v0 #Suma 1 si leyo algun byte, 0 si no
+
+	beq s2, 3, cuarta_lectura #Si s2 es 2, leimos un EOF
+
+	b cantidad_de_bytes_inconsistente
+
+cuarta_lectura:
+
+	lw a0, (FRAME_SZ)(sp)
+	la a1, in_buffer + 3
+	li a2, 1
+	li v0, SYS_read
+	syscall
+
+	beq a3, zero, cuarta_validacion_lectura
+
+	b error_lectura
+
+cuarta_validacion_lectura:
+
+	addu s2, s2, v0 #Suma 1 si leyo algun byte, 0 si no
+
+	beq s2, 4, inspeccion_buffer_leido #Si s2 es 3, leimos un EOF
+
+	b cantidad_de_bytes_inconsistente
+
+inspeccion_buffer_leido:
+
+	la t0, in_buffer #t0 = direccion in_buffer
+
+	## Los iguales solo pueden estar en la tercer lectura
+	## O solo la cuarta lectura, luego devuelvo contenido inconsistente si no es asi
+
+	lbu t1, 0(t0) # t1 = contenido de in_buffer[0]
+	li t2, '=' #Cargo el caracter '=' para comparar despues
+	beq t1, t2, contenido_inconsistente
+
+	lbu t1, 1(t0) # t1 = contenido de in_buffer[1]
+	li t2, '=' #Cargo el caracter '=' para comparar despues
+	beq t1, t2, contenido_inconsistente
+
+	lbu t1, 2(t0) # t1 = contenido de in_buffer[2]
+	beq t1, t2, chequeo_doble_igual
+
+	lbu t1, 3(t0) # t1 = contenido de in_buffer[3]
+	beq t1, t2, validacion_fin_archivo_1 #El archivo deberia terminar aca
+
+	li t3, 0
+	j decoding
+
+chequeo_doble_igual:
+
+	lbu t1, 3(t0) # t1 = contenido de in_buffer[3]
+	li t2, '='
+	beq t1, t2, validacion_fin_archivo_2 #Sin errores (se leyó **==)
+
+	b contenido_inconsistente
+
+validacion_fin_archivo_1:
+
+	lw a0, (FRAME_SZ)(sp)
+	la a1, in_buffer + 3
+	li a2, 1
+	li v0, SYS_read
+	syscall
+
+	bne a3, zero, error_lectura
+
+	beq v0,0 , contador_simple_igual #Suma 1 si leyo algun byte, 0 si no
+
+	b contenido_inconsistente
+
+contador_simple_igual:
+
+	li s3, 1 # Caso ***=
+	j decoding
+
+validacion_fin_archivo_2:
+
+	lw a0, (FRAME_SZ)(sp)
+	la a1, in_buffer + 3
+	li a2, 1
+	li v0, SYS_read
+	syscall
+
+	bne a3, zero, error_lectura
+
+	beq v0,0 , contador_doble_igual 
+
+	b contenido_inconsistente
+
+contador_doble_igual:
+
+	li s3, 2 # Caso **==
+	j decoding
+
+##RUTINA QUE BUSCA EL NUMERO DE INDICE DE B64 PARA EL CARACTER A DECODIFICAR #Le llega por t4
+
+geti64index:
+
+	li t0,0 #cargo un 0 en t0 para usarlo de contador
+
+	la t1,B64 #esto va a fallar, t1 -> direccion de inicio del array 
+
+	addu t2, t0, t1 #Posicion absoluta del indice
+
+ciclob64index:
+
+	beq t0, 64 , contenido_inconsistente
+
+	addu t2, t0, t1
+	lb t3, 0(t2) #accedo a elemento i del array y lo guardo en t3
+
+	beq t3,t4, indiceb64encontrado
+
+	addi t0,t0,1
+
+	b ciclob64index
+
+indiceb64encontrado:
+
+	j ra
+
+	##DECODE
+
+decoding:
+
+	b primer_decode
+
+primer_decode:
+
+	lb t4, in_buffer
+	la ra, segundo_decode
+
+	b geti64index
+
+segundo_decode:
+
+	sb t0, partial_decode_buffer
+	lb t4, in_buffer+1
+	la ra, tercer_decode
+
+	b geti64index
+
+tercer_decode:
+
+	sb t0, partial_decode_buffer+1
+	lb t4, in_buffer+2
+	li t5, '=' #Tengo que ver si mi tercer leida no fue un =
+	beq t4, t5, rearmado_de_bytes
+
+	la ra, cuarto_decode
+
+	b geti64index
+
+cuarto_decode:
+
+	sb t0, partial_decode_buffer+2
+	lb t4, in_buffer+3
+	li t5, '='
+	beq t4, t5, rearmado_de_bytes
+
+	la ra, finalizo_decode
+
+	b geti64index
+
+finalizo_decode:
+
+	sb t0, partial_decode_buffer+3
+
+rearmado_de_bytes:
+
+	lb t0, partial_decode_buffer
+	lb t1, partial_decode_buffer+1
+	lb t2, partial_decode_buffer+2
+	lb t3, partial_decode_buffer+3
+	la t4, out_buffer
+
+	sll t0, 2 #t0 << 2
+	li t5, 0 #Limpio t5 por las dudas
+	and t5, t1, mask1d #En t5 tengo los 2 LSB que faltan para out_buffer[0]
+	srl t5, 4 #Muevo esos dos bits a las 2 LSB positions
+	or t0, t0, t5
+	sb t0, 0(t4) # output[0] = t0
+
+	beq s3, 2, primer_escritura #Caso **== --> x
+
+	sll t1, 4 #Los 4 bits que sobraron de t1 << 4
+	li t5, 0 #Limpio t5 por las dudas
+	and t5, t2 , mask2d #En t5 tengo los 4 LSB que faltan para out_buffer[1]
+	srl t5, 2 #Muevo esos dos bits a las 4 LSB positions
+	or t1, t1, t5
+	sb t1, 1(t4) # output[1] = t1
+
+	beq s3, 1, primer_escritura #Caso ***= --> xx
+
+	sll t2, 6 #Los 2 bits que sobraron de t2 << 6
+	or t2, t2, t3
+	sb t2, 2(t4) # output[2] = t2
+
+##ESCRITURA
+
+primer_escritura:
+
+	lw	a0, (FRAME_SZ + 4)(sp)
+	la 	a1, out_buffer
+	li 	a2, 1
+	li 	v0, SYS_write
+	syscall
+
+	beq a3, 0, primer_validacion_escritura
+
+	b error_escritura
+	
+primer_validacion_escritura:
+
+	##Si lei dos iguales, solo deberia escribir un byte
+	##En este ciclo, luego, habria que salir sin errores
+
+	li t0, 2
+	beq t0, s3, salida_exitosa
+
+segunda_escritura: 
+
+	lw	a0, (FRAME_SZ + 4)(sp)
+	la 	a1, out_buffer + 1
+	li 	a2, 1
+	li 	v0, SYS_write
+	syscall
+
+	beq a3, 0, segunda_validacion_escritura
+
+	b error_escritura
+
+segunda_validacion_escritura:
+
+	## Si lei un solo igual, solo deberia escribir dos bytes
+	## En este ciclo, luego, habria que salir sin errores
+
+	li t0, 1
+	beq t0, s3, salida_exitosa
+
+tercer_escritura:
+
+	lw	a0, (FRAME_SZ + 4)(sp)
+	la 	a1, out_buffer + 2
+	li 	a2, 1
+	li 	v0, SYS_write
+	syscall
+
+	beq a3, 0, continuo_ciclo
+
+	b error_escritura
+
+continuo_ciclo:
+
+	j primer_lectura
+
+##RETORNOS
+
+salida_exitosa:
+
+	li v0, 0
+	j end
+
+error_lectura:
+
+	li v0, 1
+	j end
+
+error_escritura:
+
+	li v0, 2
+	j end
+
+cantidad_de_bytes_inconsistente:
+
+	li v0, 3
+	j end
+
+contenido_inconsistente:
+
+	li v0, 4 # Error de contenido inconsistente
+	j end
+
+end:
+
+	lw  a1,  (FRAME_SZ +  4)(sp)
+	lw 	a0,  (FRAME_SZ	   )(sp)
+
+	lw 	gp,  (FRAME_SZ - 24)(sp)
+	lw 	$fp, (FRAME_SZ - 20)(sp)
+	lw 	ra,  (FRAME_SZ - 16)(sp)
+	lw  s3,  (FRAME_SZ - 12)(sp)
+	lw  s2,  (FRAME_SZ -  8)(sp)
+
+	addu 	sp,  sp, FRAME_SZ
+
+	jr 	ra
+.end decode
+
+.data
+.align 2
+
+partial_decode_buffer:
+	.space  4
+	.byte 	0, 0, 0, 0
+in_buffer:
+	.space  4
+	.byte 	0, 0, 0, 0
+out_buffer:
+	.space  3
+	.byte 	0, 0, 0
+\end{Verbatim}
 	
 	\section{Conclusiones}
 	En conclusión, se cumplió el objetivo del Trabajo Práctico ya que se desarrolló el programa detallado por el enunciado. Los comandos del programa se ejecutan como detalla el comando \texttt{-h} y tras ser sometidos a distintas pruebas se concluye que funcionan según lo esperado. Así mismo fue posible la implementación del código en MIPS32 y se pudo utilizar el programa GXemul para simular un entorno de desarrollo de una maquina MIPS corriendo el sistema operativo NetBSD para ejecutarlo. Los distintos problemas que surgieron pudieron solucionarse pero muchas veces se generó una complicación muy grande a la hora de realizar un seguimiento del contenido de los registros. No se pudo obtener una solución a la lectura de un buffer de 1 byte pero no se consideró que eso genere una solución más ineficaz debido a que igualmente el programa se desarrolló según los parámetros esperados.
