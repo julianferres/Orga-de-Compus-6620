@@ -1,4 +1,3 @@
-//#define _POSIX_SOURCE
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -61,9 +60,7 @@ int main (int argc, char const *argv[]) {
                 if (! strcmp(optarg,"-")) continue;
                 FILE* fp = fopen(optarg, "r");
                 if(! fp) { fprintf(stderr, "File not found \n"); return 1; }
-    			fd = fileno(fp);
-                //fclose(fp);
-    			
+    			fd = fileno(fp);    			
                 continue;
 
     		case 'o': 
