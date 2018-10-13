@@ -59,7 +59,7 @@ lectura_inicial:
 	li	v0, SYS_read
 	syscall
 
- 	#Recupero t1 despues de la syscall
+ 	##Recupero t1 despues de la syscall
 	lw t1, (20)(sp) 
 
 	bne a3, 0, error 
