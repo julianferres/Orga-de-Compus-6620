@@ -32,18 +32,6 @@ encode:
 	sw a0, FRAME_SZ(sp) #Salvo el file descriptor de entrada en el arg building area del caller a0 -> fp
 	sw a1, (FRAME_SZ+4)(sp) #Salvo el file descriptor de salida en el arg building area del caller a1 -> wfp
 
-limpieza_buffer:
-	la t0, buffer_entrada
-	sb    zero, 0(t0)
-    sb    zero, 1(t0)
-    sb    zero, 2(t0)
-
-    la t1, buffer_salida
-	sb    zero, 0(t1)
-    sb    zero, 1(t1)
-    sb    zero, 2(t1)
-    sb    zero, 3(t1)
-
 lectura_inicial:
 	la t0, buffer_entrada #aca podríamos llenar de cero para verificar que quede todo en cero pero podría no ser necesario
 
@@ -298,7 +286,5 @@ end:
 
 buffer_entrada: 
 	.space 3
-	.byte	0, 0, 0
 buffer_salida: 
 	.space 4
-	.byte	0, 0, 0, 0		
