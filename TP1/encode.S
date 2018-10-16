@@ -29,9 +29,6 @@ encode:
 	sw	ra,(FRAME_SZ-8)(sp) 
 	move	$fp,sp
 
-	sw t1,20(sp) #guardo t0 en el area de la pila de las variables locales
-
-
 	sw a0, FRAME_SZ(sp) #Salvo el file descriptor de entrada en el arg building area del caller a0 -> fp
 	sw a1, (FRAME_SZ+4)(sp) #Salvo el file descriptor de salida en el arg building area del caller a1 -> wfp
 
@@ -51,6 +48,8 @@ lectura_inicial:
 	la t0, buffer_entrada #aca podríamos llenar de cero para verificar que quede todo en cero pero podría no ser necesario
 
 	li t1, 0 #inicializo contador en 0
+	sw t1,20(sp) #guardo t0 en el area de la pila de las variables locales
+
 	sw t1, (20)(sp) #lo guardo en la pila
 
 	lw	a0, (FRAME_SZ)(sp) #a0 -> file descriptor
