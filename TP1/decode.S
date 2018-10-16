@@ -1,6 +1,21 @@
 #include <mips/regdef.h>
 #include <sys/syscall.h>
 
+## ASCII art del stack
+
+##	   STACK FRAME
+## *******************
+## 28 *****	ra *******
+## 24 *****	gp *******
+## 20 *****	fp *******
+## 16 *****	s3 *******
+## 12 *****	s2 *******
+## 8 *****	-- *******
+## 4 *****	-- *******
+## 0 *****	-- *******
+## *******************  
+
+
 #define FRAME_SZ 32
 
 #define mask1d	0x30 
@@ -22,11 +37,11 @@ decode:
 
 	subu 	sp,  sp, FRAME_SZ
 
-	.cprestore (FRAME_SZ-24)
-	sw 	    $fp, (FRAME_SZ - 20)(sp)
-	sw 	    ra,  (FRAME_SZ - 16)(sp)
-    sw      s2,  (FRAME_SZ - 12)(sp)
-    sw      s3,  (FRAME_SZ - 8)(sp)
+	.cprestore (FRAME_SZ-8)
+	sw 	    ra,  (FRAME_SZ - 4)(sp)
+	sw 	    $fp, (FRAME_SZ - 12)(sp)
+	sw      s3,  (FRAME_SZ - 16)(sp)
+    sw      s2,  (FRAME_SZ - 20)(sp)
 
 	move    $fp, sp
 
@@ -35,86 +50,21 @@ decode:
 
 ##LECTURAS 
 
-primer_lectura: 
+lectura: 
 	
 	lw a0, (FRAME_SZ)(sp)
 	la a1, in_buffer
-	li a2, 1
+	li a2, 4
 	li v0, SYS_read
 	syscall
 
-	beq a3, zero, primer_validacion_lectura
-	
-	b error_lectura
+validacion_lectura:
 
-primer_validacion_lectura:
+	bne a3, zero, error_lectura
 
-	li s2, 0 #La cuenta de los bytes leidos
-	addu s2, s2, v0 #Suma 1 si leyo algun byte, 0 si no
-
-	beq s2, 1, segunda_lectura #Si s2 es 0, leimos un EOF
-	
-	b salida_exitosa
-
-segunda_lectura:
-
-	lw a0, (FRAME_SZ)(sp)
-	la a1, in_buffer + 1 
-	li a2, 1
-	li v0, SYS_read
-	syscall #Leo segundo byte
-
-    beq a3, zero, segunda_validacion_lectura
-    
-    b error_lectura
-
-segunda_validacion_lectura:
-
-	addu s2, s2, v0 #Suma 1 si leyo algun byte, 0 si no
-
-	beq s2, 2, tercera_lectura #Si s2 es 1, leimos un EOF
-	
-	b cantidad_de_bytes_inconsistente
-
-tercera_lectura:
-
-    lw a0, (FRAME_SZ)(sp)
-	la a1, in_buffer + 2
-	li a2, 1
-	li v0, SYS_read
-	syscall
-
-    beq a3, zero, tercer_validacion_lectura
-    
-    b error_lectura
-
-tercer_validacion_lectura:
-
-	addu s2, s2, v0 #Suma 1 si leyo algun byte, 0 si no
-
-	beq s2, 3, cuarta_lectura #Si s2 es 2, leimos un EOF
-	
-	b cantidad_de_bytes_inconsistente
-
-cuarta_lectura:
-	
-	lw a0, (FRAME_SZ)(sp)
-	la a1, in_buffer + 3
-	li a2, 1
-	li v0, SYS_read
-	syscall
-
-    beq a3, zero, cuarta_validacion_lectura
-
-    b error_lectura
-
-cuarta_validacion_lectura:
-
-	addu s2, s2, v0 #Suma 1 si leyo algun byte, 0 si no
-
-	beq s2, 4, inspeccion_buffer_leido #Si s2 es 3, leimos un EOF
-	
-	b cantidad_de_bytes_inconsistente
+	beq v0, zero, salida_exitosa #Si v0 es 0, leimos un EOF, y hay que salir exitosamente
+	bne v0, 4 , cantidad_de_bytes_inconsistente
+	##Si v0 es menor que 4, estamos leyendo de un archivo que tiene una cantidad inconsistente de bytes
 
 inspeccion_buffer_leido:
 
@@ -348,7 +298,7 @@ tercer_escritura:
 
 continuo_ciclo:
 
-	j primer_lectura
+	j lectura
 
 ##RETORNOS
 
@@ -382,11 +332,11 @@ end:
 	lw  a1,  (FRAME_SZ +  4)(sp)
     lw 	a0,  (FRAME_SZ	   )(sp)
 
-	lw 	gp,  (FRAME_SZ - 24)(sp)
-	lw 	$fp, (FRAME_SZ - 20)(sp)
-	lw 	ra,  (FRAME_SZ - 16)(sp)
-    lw  s3,  (FRAME_SZ - 12)(sp)
-    lw  s2,  (FRAME_SZ -  8)(sp)
+	lw 	ra,  (FRAME_SZ - 4)(sp)
+	lw 	gp,  (FRAME_SZ - 8)(sp)
+	lw 	$fp, (FRAME_SZ - 12)(sp)
+    lw  s3,  (FRAME_SZ - 16)(sp)
+    lw  s2,  (FRAME_SZ -  20)(sp)
 
 	addu 	sp,  sp, FRAME_SZ
 
