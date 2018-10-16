@@ -23,7 +23,7 @@ decode:
 
 	subu 	sp,  sp, FRAME_SZ
 
-    sw      gp,  (FRAME_SZ - 24)(sp)
+	.cprestore (FRAME_SZ-24)
 	sw 	    $fp, (FRAME_SZ - 20)(sp)
 	sw 	    ra,  (FRAME_SZ - 16)(sp)
     sw      s2,  (FRAME_SZ - 12)(sp)
