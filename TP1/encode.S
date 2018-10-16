@@ -1,7 +1,7 @@
 #include <mips/regdef.h>
 #include <sys/syscall.h>
 
-#define FRAME_SZ 48
+#define FRAME_SZ 28
 
 #define a1mask	0xFC
 #define a2mask	0x03 		
@@ -18,22 +18,24 @@
 .ent		encode
 
 encode:
+
 	.set		noreorder
 	.cpload		t9
 	.set		reorder
 
-	sub	sp,sp, FRAME_SZ
+	subu 	sp,  sp, FRAME_SZ
 
-	sw	$fp,(FRAME_SZ-16)(sp)
-	.cprestore (FRAME_SZ-12)
-	sw	ra,(FRAME_SZ-8)(sp) 
-	move	$fp,sp
+	.cprestore (FRAME_SZ-24)
+	sw 	    $fp, (FRAME_SZ - 20)(sp)
+	sw 	    ra,  (FRAME_SZ - 16)(sp)
+    sw      s3,  (FRAME_SZ - 12)(sp)
 
-	sw a0, FRAME_SZ(sp) #Salvo el file descriptor de entrada en el arg building area del caller a0 -> fp
-	sw a1, (FRAME_SZ+4)(sp) #Salvo el file descriptor de salida en el arg building area del caller a1 -> wfp
+	move    $fp, sp
+
+	sw 	    a0,  (FRAME_SZ     )(sp)
+	sw 	    a1,  (FRAME_SZ +  4)(sp)
 
 read:
-	la t0, buffer_entrada 
 
 	lw	a0, (FRAME_SZ)(sp) #a0 -> file descriptor
 	la	a1, buffer_entrada #a1 -> buffer de entrada
@@ -42,15 +44,16 @@ read:
 	syscall
 
 	bne a3, 0, error 
-	
-	beq v0, 0, end #si leyo EOF que termine el programa
+	beq v0, 0, end # lectura de EOF
+
+	move s3, v0
 
 primer_caracter:
 
 	la t0, buffer_entrada
 	la t2, buffer_salida
 
-	## Codificación primera lectura
+	## Codificación primer byte
 
 	lbu	t3, 0(t0) 	# t3 = buffer_entrada[0] = buffer
 
@@ -71,14 +74,15 @@ primer_caracter:
 	lb	t0, 0(t0)		# t0 = B64[t3]
 	sb	t0, 0(t2)		# buffer_salida[0] = t0
 
-	beq v0, 1, escribir_doble_padding #si leyo 1 byte tiene que hacer doble padding
+	li t0, 1
+	beq s3, t0, doble_padding #si leyo 1 byte que escriba doble padding
 
 segundo_caracter:
 
 	la t0, buffer_entrada
 	la t2, buffer_salida
 
-	## Codificación segunda lectura
+	## Codificación segundo byte
 
 	lbu	t3, 1(t0) 	# t3 = buffer_entrada[1] = buffer
 
@@ -100,14 +104,15 @@ segundo_caracter:
 	lb	t0, 0(t0)		# t0 = B64[t3]
 	sb	t0, 1(t2)		# buffer_salida[1] = t0
 
-	beq v0, 2, escribir_simple_padding #si leyo 2 bytes tiene que hacer simple padding
+	li t0, 2
+	beq s3, t0, simple_padding #si leyo 2 bytes que escriba simple padding
 
 tercer_cuarto_caracter:
 
 	la t0, buffer_entrada
 	la t2, buffer_salida
 
-	## Codificación tercera lectura
+	## Codificación tercer byte
 
 	lbu	t3, 2(t0) 	# t3 = buffer_entrada[2] = buffer
 
@@ -138,7 +143,7 @@ tercer_cuarto_caracter:
 
 	b write
 
-escribir_doble_padding:
+doble_padding:
 
 	la t2, buffer_salida
 
@@ -161,7 +166,7 @@ escribir_doble_padding:
 
 	b write
 
-escribir_simple_padding:
+simple_padding:
 
 	la t2, buffer_salida
 
@@ -187,6 +192,7 @@ write:
 	li	v0, SYS_write
 	syscall
 
+	lw a0, (FRAME_SZ)(sp) #a0 -> file descriptor real
     beq a3, 0, read
     
 error:
@@ -196,17 +202,19 @@ error:
 	syscall	
 
 end:
-	li v0, 0
-	lw	a1,  (FRAME_SZ +  4)(sp)
-	lw	a0,  (FRAME_SZ     )(sp)
 
-	lw $fp,(FRAME_SZ-16)(sp)
-	lw gp,(FRAME_SZ-12)(sp)
-	lw ra,(FRAME_SZ-8)(sp) #duda
+	lw  a1,  (FRAME_SZ +  4)(sp)
+    lw 	a0,  (FRAME_SZ	   )(sp)
 
-	addu sp,sp,FRAME_SZ #Libero el stackFrame
+	lw 	gp,  (FRAME_SZ - 24)(sp)
+	lw 	$fp, (FRAME_SZ - 20)(sp)
+	lw 	ra,  (FRAME_SZ - 16)(sp)
+    lw  s3,  (FRAME_SZ - 12)(sp)
 
-	jr ra
+	addu 	sp,  sp, FRAME_SZ
+
+	jr 	ra
+
 
 .end encode
 
