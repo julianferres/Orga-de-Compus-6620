@@ -1,8 +1,28 @@
 #include <mips/regdef.h>
 #include <sys/syscall.h>
 
-#define FRAME_SZ 28
 
+
+
+## ASCII art del stack
+
+##	   STACK FRAME
+## *******************
+## 28 *****	ra *******
+## 24 *****	gp *******
+## 20 *****	fp *******
+## 16 *****	s3 *******
+## 12 *****	-- *******
+## 8 *****	-- *******
+## 4 *****	-- *******
+## 0 *****	-- *******
+## *******************  
+## Las 4 posiciones mas bajas son reservardas para Arg Building Area
+
+
+
+
+#define FRAME_SZ 28
 #define a1mask	0xFC
 #define a2mask	0x03 		
 #define b1mask	0xF0
