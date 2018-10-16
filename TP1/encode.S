@@ -32,54 +32,20 @@ encode:
 	sw a0, FRAME_SZ(sp) #Salvo el file descriptor de entrada en el arg building area del caller a0 -> fp
 	sw a1, (FRAME_SZ+4)(sp) #Salvo el file descriptor de salida en el arg building area del caller a1 -> wfp
 
-lectura_inicial:
-	la t0, buffer_entrada #aca podríamos llenar de cero para verificar que quede todo en cero pero podría no ser necesario
-
-	li t1, 0 #inicializo contador en 0
-	sw t1,20(sp) #guardo t0 en el area de la pila de las variables locales
+read:
+	la t0, buffer_entrada 
 
 	lw	a0, (FRAME_SZ)(sp) #a0 -> file descriptor
 	la	a1, buffer_entrada #a1 -> buffer de entrada
-	li	a2, 1 #a2 -> leer 1 byte
+	li	a2, 3 #a2 -> leer 3 bytes
 	li	v0, SYS_read
 	syscall
 
- 	##Recupero t1 despues de la syscall
-	lw t1, (20)(sp) 
-
 	bne a3, 0, error 
+	
 	beq v0, 0, end #si leyo EOF que termine el programa
-
-lectura_1:
-	lw	a0, (FRAME_SZ)(sp) #a0 -> file descriptor
- 	la	a1, buffer_entrada + 1 #a1 -> buffer de entrada + 1
- 	li	a2, 1 #a2 -> leer 1 byte
- 	li	v0, SYS_read 
- 	syscall
-
- 	##Recupero t1 despues de la syscall
-	lw t1, (20)(sp) 
-
- 	beq v0, zero, primer_caracter #si termino de leer que vaya a ciclo
-
- 	bne a3, 0, error #agregar = FALTA
-
- 	addiu t1, t1, 1 #contador ++
-	sw t1, (20)(sp) #lo guardo en la pila
-
-lectura_2:
-	lw	a0, (FRAME_SZ)(sp) #a0 -> file descriptor
- 	la	a1, buffer_entrada + 2 #a1 -> buffer de entrada + 1
- 	li	a2, 1 #a2 -> leer 1 byte
- 	li	v0, SYS_read 
- 	syscall
-
- 	##Recupero t1 despues de la syscall
-	lw t1, (20)(sp) 
-
- 	bne a3, 0, error #agregar = FALTA	
-	addiu t1, t1, 1 #contador ++
-	sw t1, (20)(sp) #lo guardo en la pila
+	beq v0, 1, escribir_doble_padding #si leyo 1 byte tiene que hacer doble padding
+	beq v0, 2, escribir_simple_padding #si leyo 2 bytes tiene que hacer simple padding
 
 primer_caracter:
 	la t0, buffer_entrada
@@ -105,8 +71,6 @@ primer_caracter:
 	addu t0, t0, t3		
 	lb	t0, 0(t0)		# t0 = B64[t3]
 	sb	t0, 0(t2)		# buffer_salida[0] = t0
-
-	beq t1, zero, escribir_doble_padding #si el contador esta en 1 es porque no tenía segundo caracter para leer y hay que agregar dos iguales
 
 segundo_caracter:
 
@@ -134,8 +98,6 @@ segundo_caracter:
 	addu t0, t0, t3		
 	lb	t0, 0(t0)		# t0 = B64[t3]
 	sb	t0, 1(t2)		# buffer_salida[1] = t0
-
-	beq v0, zero, escribir_simple_padding
 
 tercer_cuarto_caracter:
 
@@ -231,7 +193,6 @@ error:
 	syscall	
 
 end:
-
 	li v0, 0
 	lw	a1,  (FRAME_SZ +  4)(sp)
 	lw	a0,  (FRAME_SZ     )(sp)
