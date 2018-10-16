@@ -44,10 +44,9 @@ read:
 	bne a3, 0, error 
 	
 	beq v0, 0, end #si leyo EOF que termine el programa
-	beq v0, 1, escribir_doble_padding #si leyo 1 byte tiene que hacer doble padding
-	beq v0, 2, escribir_simple_padding #si leyo 2 bytes tiene que hacer simple padding
 
 primer_caracter:
+
 	la t0, buffer_entrada
 	la t2, buffer_salida
 
@@ -71,6 +70,8 @@ primer_caracter:
 	addu t0, t0, t3		
 	lb	t0, 0(t0)		# t0 = B64[t3]
 	sb	t0, 0(t2)		# buffer_salida[0] = t0
+
+	beq v0, 1, escribir_doble_padding #si leyo 1 byte tiene que hacer doble padding
 
 segundo_caracter:
 
@@ -98,6 +99,8 @@ segundo_caracter:
 	addu t0, t0, t3		
 	lb	t0, 0(t0)		# t0 = B64[t3]
 	sb	t0, 1(t2)		# buffer_salida[1] = t0
+
+	beq v0, 2, escribir_simple_padding #si leyo 2 bytes tiene que hacer simple padding
 
 tercer_cuarto_caracter:
 
@@ -184,7 +187,7 @@ write:
 	li	v0, SYS_write
 	syscall
 
-    beq a3, 0, lectura_inicial
+    beq a3, 0, read
     
 error:
 
