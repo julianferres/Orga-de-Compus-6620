@@ -2,9 +2,7 @@
 #include <sys/syscall.h>
 
 
-
-
-## ASCII art del stack
+## ASCII art del stack frame
 
 ##	   STACK FRAME
 ## *******************
@@ -18,8 +16,6 @@
 ## 0 *****	-- *******
 ## *******************  
 ## Las 4 posiciones mas bajas son reservardas para Arg Building Area
-
-
 
 
 #define FRAME_SZ 28
