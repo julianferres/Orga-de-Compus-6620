@@ -38,8 +38,6 @@ lectura_inicial:
 	li t1, 0 #inicializo contador en 0
 	sw t1,20(sp) #guardo t0 en el area de la pila de las variables locales
 
-	sw t1, (20)(sp) #lo guardo en la pila
-
 	lw	a0, (FRAME_SZ)(sp) #a0 -> file descriptor
 	la	a1, buffer_entrada #a1 -> buffer de entrada
 	li	a2, 1 #a2 -> leer 1 byte
@@ -173,7 +171,7 @@ tercer_cuarto_caracter:
 	lb	t0, 0(t0)		# t0 = B64[t3]
 	sb	t0, 3(t2)		# buffer_salida[3] = t0
 
-	b write_1
+	b write
 
 escribir_doble_padding:
 
@@ -196,7 +194,7 @@ escribir_doble_padding:
 	sb t0, 2(t2) #buffer_salida[2] = t0
 	sb t0, 3(t2) #buffer_salida[3] = t0
 
-	b write_1
+	b write
 
 escribir_simple_padding:
 
@@ -216,48 +214,15 @@ escribir_simple_padding:
 	li t0, '=' # Guardo = en t0
 	sb t0, 3(t2) #buffer_salida[3] = t0
 
-write_1:
+write:
 
-	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> wfd
-	la	a1, buffer_salida #a1-> direccion del primer caracter
-
-	li	a2, 1 #a2-> 1 byte
+	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> file descriptor de escritura
+	la	a1, buffer_salida #a1 -> direccion del buffer de salida
+	li	a2, 4 #a2 -> 4 bytes a escribir
 	li	v0, SYS_write
 	syscall
 
-    bne a3, 0, error
-
-write_2:    
-
-	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> wfd
-	la	a1, buffer_salida + 1 #a1-> direccion del segundo caracter
-	
-	li	a2, 1 #a2-> 1 byte
-	li	v0, SYS_write
-	syscall
-
-    bne a3, 0, error
-
-write_3:
-	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> wfd
-	la	a1, buffer_salida + 2 #a1-> direccion del tercer caracter
-
-	li	a2, 1 #a2-> 1 byte
-	li	v0, SYS_write
-	syscall
-
-    bne a3, 0, error
-
-write_4:
-
-	lw	a0, (FRAME_SZ + 4)(sp) #a0 -> wfd
-	la	a1, buffer_salida + 3 #a1-> direccion del cuarto caracter
-
-	li	a2, 1 #a2-> 1 byte
-	li	v0, SYS_write
-	syscall
-
-    beq a3, 0, lectura_inicial	
+    beq a3, 0, lectura_inicial
     
 error:
 
