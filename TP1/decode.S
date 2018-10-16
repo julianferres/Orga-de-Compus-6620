@@ -15,11 +15,10 @@
 .globl		decode
 .ent		decode
 
-.set		noreorder
-.cpload		t9
-.set		reorder
-
 decode:
+	.set		noreorder
+	.cpload		t9
+	.set		reorder
 
 	subu 	sp,  sp, FRAME_SZ
 

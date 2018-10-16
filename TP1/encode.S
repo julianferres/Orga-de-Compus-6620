@@ -17,11 +17,11 @@
 .globl		encode
 .ent		encode
 
-.set		noreorder
-.cpload		t9
-.set		reorder
-
 encode:
+	.set		noreorder
+	.cpload		t9
+	.set		reorder
+
 	sub	sp,sp, FRAME_SZ
 
 	sw	$fp,(FRAME_SZ-16)(sp)
